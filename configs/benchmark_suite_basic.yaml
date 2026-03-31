@@ -1,0 +1,47 @@
+name: benchmark_suite_basic
+description: Basic evaluation benchmark suite for initial model assessment
+
+models:
+  - name: gpt-4o-mini
+    provider: openai
+    params:
+      temperature: 0.7
+      max_tokens: 2048
+      top_p: 0.9
+
+  - name: claude-sonnet-4-6
+    provider: anthropic
+    params:
+      temperature: 0.7
+      max_tokens: 2048
+
+metrics:
+  - name: rubric_judge_accuracy
+    type: rubric
+    params:
+      scale: 10
+      dimensions:
+        - name: accuracy
+          weight: 0.6
+        - name: relevance
+          weight: 0.4
+
+  - name: instruction_following
+    type: instruction_following
+    params:
+      model: gpt-4o-mini
+
+test_cases: 20
+parallel: false
+timeout: 30
+output_dir: ./results/basic_benchmark
+
+dataset:
+  name: general_qa
+  type: json
+  path: datasets/general_qa_20_samples.json
+
+evaluation_config:
+  retry_on_failure: true
+  max_retries: 2
+  error_handling: skip_on_error

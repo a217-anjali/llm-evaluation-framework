@@ -1,0 +1,145 @@
+name: Evaluation CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'llm_eval_framework/**'
+      - 'tests/**'
+      - 'configs/**'
+      - '.github/workflows/eval-ci.yml'
+
+jobs:
+  evaluation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pyyaml
+
+      - name: Validate evaluation config
+        run: |
+          python -m llm_eval_framework.harness.config --validate configs/ci_eval_config.yaml
+
+      - name: Run evaluation suite
+        id: eval
+        run: |
+          python -m llm_eval_framework.harness.runner \
+            --config configs/ci_eval_config.yaml \
+            --output ./eval_results.json \
+            --timeout 120 \
+            --log-level INFO
+        continue-on-error: true
+
+      - name: Parse evaluation results
+        id: parse_results
+        if: always()
+        run: |
+          python << 'EOF'
+          import json
+          import sys
+
+          try:
+            with open('./eval_results.json', 'r') as f:
+              results = json.load(f)
+
+            mean_score = results.get('statistics', {}).get('mean_score', 0)
+            passed = mean_score >= results.get('quality_gates', {}).get('minimum_score', 0.7)
+
+            print(f"mean_score={mean_score}")
+            print(f"passed={passed}")
+
+            with open('eval_summary.txt', 'w') as f:
+              f.write(f"Mean Score: {mean_score:.2f}\n")
+              f.write(f"Status: {'PASS' if passed else 'FAIL'}\n")
+
+            if not passed:
+              sys.exit(1)
+          except Exception as e:
+            print(f"Error parsing results: {e}")
+            sys.exit(1)
+          EOF
+
+      - name: Archive evaluation results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: eval-results
+          path: |
+            eval_results.json
+            eval_summary.txt
+
+      - name: Comment PR with evaluation results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const summary = fs.readFileSync('eval_summary.txt', 'utf8');
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## Evaluation Results\n\`\`\`\n${summary}\`\`\``
+              });
+            } catch (e) {
+              console.log('Could not read evaluation summary');
+            }
+        continue-on-error: true
+
+      - name: Check evaluation quality gate
+        if: always()
+        run: |
+          if [ ! -f eval_summary.txt ]; then
+            echo "::error::Evaluation did not complete successfully"
+            exit 1
+          fi
+
+          if grep -q "FAIL" eval_summary.txt; then
+            echo "::error::Evaluation quality gate failed"
+            exit 1
+          fi
+
+          echo "✅ Evaluation quality gate passed"
+
+      - name: Update PR status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const isPassing = fs.existsSync('eval_summary.txt') &&
+                            !fs.readFileSync('eval_summary.txt', 'utf8').includes('FAIL');
+
+            github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'LLM Evaluation',
+              head_sha: context.sha,
+              status: 'completed',
+              conclusion: isPassing ? 'success' : 'failure',
+              output: {
+                title: 'Evaluation Results',
+                summary: isPassing ? 'All quality gates passed' : 'Quality gates failed'
+              }
+            });
+        continue-on-error: true

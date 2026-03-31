@@ -1,0 +1,107 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llm-eval-framework"
+version = "0.1.0"
+description = "A comprehensive, production-ready framework for evaluating Large Language Models"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+authors = [
+    {name = "LLM Eval Framework Contributors"},
+]
+keywords = [
+    "llm",
+    "evaluation",
+    "benchmarks",
+    "ai",
+    "nlp",
+    "machine-learning",
+    "language-models",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "litellm>=1.55.0",
+    "pydantic>=2.10.0",
+    "numpy>=1.26.0",
+    "pandas>=2.2.0",
+    "scipy>=1.14.0",
+    "scikit-learn>=1.6.0",
+    "matplotlib>=3.9.0",
+    "seaborn>=0.13.0",
+    "plotly>=5.24.0",
+    "pyyaml>=6.0.2",
+    "rich>=13.9.0",
+    "httpx>=0.28.0",
+    "tqdm>=4.67.0",
+    "jinja2>=3.1.4",
+    "tiktoken>=0.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.0",
+]
+docs = [
+    "mkdocs-material>=9.5.0",
+    "mkdocs-awesome-pages-plugin>=2.9.0",
+    "mkdocstrings[python]>=0.27.0",
+    "pymdown-extensions>=10.12.0",
+]
+notebooks = [
+    "jupyterlab>=4.3.0",
+    "ipywidgets>=8.1.0",
+    "nbformat>=5.10.0",
+]
+all = [
+    "llm-eval-framework[dev,docs,notebooks]",
+]
+
+[project.urls]
+Homepage = "https://a217-anjali.github.io/llm-evaluation-framework/"
+Repository = "https://github.com/a217-anjali/llm-evaluation-framework"
+Documentation = "https://a217-anjali.github.io/llm-evaluation-framework/"
+Issues = "https://github.com/a217-anjali/llm-evaluation-framework/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/llm_eval_framework"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "ANN", "B", "SIM"]
+ignore = ["ANN101", "ANN102", "ANN401"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks integration tests requiring API keys",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true

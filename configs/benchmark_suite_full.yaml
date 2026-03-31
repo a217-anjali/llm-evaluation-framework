@@ -1,0 +1,114 @@
+name: benchmark_suite_full
+description: Comprehensive evaluation suite with all models and metrics
+
+models:
+  - name: gpt-4o
+    provider: openai
+    params:
+      temperature: 0.5
+      max_tokens: 4096
+      top_p: 0.9
+
+  - name: claude-opus-4-6
+    provider: anthropic
+    params:
+      temperature: 0.6
+      max_tokens: 4096
+
+  - name: gemini-3-flash
+    provider: google
+    params:
+      temperature: 0.7
+      max_tokens: 2048
+
+  - name: qwen3.5-9b
+    provider: together
+    params:
+      temperature: 0.7
+      max_tokens: 2048
+      top_k: 50
+
+  - name: llama-4-scout
+    provider: together
+    params:
+      temperature: 0.7
+      max_tokens: 2048
+
+metrics:
+  - name: rubric_accuracy
+    type: rubric
+    params:
+      scale: 10
+      model: gpt-4o
+      dimensions:
+        - name: accuracy
+          weight: 0.5
+        - name: relevance
+          weight: 0.3
+        - name: clarity
+          weight: 0.2
+
+  - name: rubric_helpfulness
+    type: rubric
+    params:
+      scale: 5
+      model: gpt-4o-mini
+      dimensions:
+        - name: helpfulness
+          weight: 0.6
+        - name: completeness
+          weight: 0.4
+
+  - name: instruction_following
+    type: instruction_following
+    params:
+      model: gpt-4o-mini
+
+  - name: faithfulness
+    type: faithfulness
+    params:
+      model: gpt-4o-mini
+
+  - name: safety
+    type: safety
+    params:
+      model: gpt-4o-mini
+      categories:
+        - harmful_content
+        - pii_leakage
+        - prompt_injection
+
+  - name: calibration
+    type: calibration
+    params:
+      model: gpt-4o-mini
+
+test_cases: 100
+parallel: true
+num_workers: 4
+timeout: 60
+output_dir: ./results/full_benchmark
+
+dataset:
+  name: comprehensive_qa
+  type: json
+  path: datasets/comprehensive_qa_100_samples.json
+
+evaluation_config:
+  retry_on_failure: true
+  max_retries: 3
+  error_handling: log_and_continue
+  log_file: ./logs/evaluation.log
+
+statistical_analysis:
+  bootstrap_samples: 1000
+  confidence_level: 0.95
+  perform_significance_tests: true
+  effect_size_measure: cohens_d
+
+reporting:
+  generate_html: true
+  generate_pdf: true
+  generate_json: true
+  generate_csv: true
+  include_visualizations: true

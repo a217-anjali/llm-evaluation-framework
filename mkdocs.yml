@@ -1,0 +1,154 @@
+site_name: LLM Evaluation Framework
+site_url: https://a217-anjali.github.io/llm-evaluation-framework/
+site_description: >-
+  The definitive open-source guide to evaluating Large Language Models —
+  theory, benchmarks, tooling, hands-on labs, and production patterns.
+site_author: LLM Eval Framework Contributors
+repo_url: https://github.com/a217-anjali/llm-evaluation-framework
+repo_name: llm-evaluation-framework
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2026 LLM Eval Framework Contributors — Apache 2.0
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to dark mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.details
+  - pymdownx.mark
+  - pymdownx.critic
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - def_list
+  - toc:
+      permalink: true
+      toc_depth: 3
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/a217-anjali/llm-evaluation-framework
+  generator: false
+
+nav:
+  - Home: index.md
+  - Foundations:
+    - 01-foundations/why-evaluation-matters.md
+    - 01-foundations/taxonomy-of-evaluations.md
+    - 01-foundations/metrics-deep-dive.md
+    - 01-foundations/statistical-rigor.md
+  - Benchmarks:
+    - 02-benchmarks/landscape-overview.md
+    - 02-benchmarks/knowledge-reasoning.md
+    - 02-benchmarks/math-and-coding.md
+    - 02-benchmarks/instruction-following-chat.md
+    - 02-benchmarks/long-context.md
+    - 02-benchmarks/multimodal.md
+    - 02-benchmarks/agentic.md
+    - 02-benchmarks/safety-alignment.md
+    - 02-benchmarks/multilingual.md
+    - 02-benchmarks/rag-benchmarks.md
+    - 02-benchmarks/embeddings-retrieval.md
+  - Methods:
+    - 03-methods/llm-as-judge.md
+    - 03-methods/human-evaluation.md
+    - 03-methods/rag-evaluation.md
+    - 03-methods/pairwise-and-elo.md
+    - 03-methods/agentic-evaluation-methods.md
+    - 03-methods/custom-eval-design.md
+    - 03-methods/contamination-detection.md
+  - Tooling:
+    - 04-tooling/tool-comparison-matrix.md
+    - 04-tooling/deepeval-guide.md
+    - 04-tooling/lm-eval-harness-guide.md
+    - 04-tooling/inspect-ai-guide.md
+    - 04-tooling/ragas-guide.md
+    - 04-tooling/promptfoo-guide.md
+    - 04-tooling/langsmith-guide.md
+    - 04-tooling/braintrust-guide.md
+    - 04-tooling/langfuse-guide.md
+    - 04-tooling/custom-harness.md
+  - Hands-On Labs:
+    - 05-hands-on/lab-01-basic-benchmark.md
+    - 05-hands-on/lab-02-llm-as-judge.md
+    - 05-hands-on/lab-03-rag-eval-pipeline.md
+    - 05-hands-on/lab-04-safety-red-team.md
+    - 05-hands-on/lab-05-agentic-eval.md
+    - 05-hands-on/lab-06-custom-domain-eval.md
+    - 05-hands-on/lab-07-statistical-analysis.md
+    - 05-hands-on/lab-08-eval-ci-cd.md
+    - 05-hands-on/lab-09-model-selection-pareto.md
+  - Production:
+    - 06-production/eval-driven-model-selection.md
+    - 06-production/continuous-evaluation.md
+    - 06-production/eval-ops-architecture.md
+    - 06-production/reporting-and-governance.md
+  - References:
+    - 07-references/paper-reading-list.md
+    - 07-references/glossary.md
+    - 07-references/changelog.md

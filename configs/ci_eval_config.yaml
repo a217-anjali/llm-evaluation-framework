@@ -1,0 +1,61 @@
+name: ci_eval_config
+description: CI/CD evaluation configuration for fast feedback on PRs
+
+models:
+  - name: gpt-4o-mini
+    provider: openai
+    params:
+      temperature: 0.7
+      max_tokens: 1024
+
+metrics:
+  - name: accuracy
+    type: rubric
+    params:
+      scale: 10
+      model: gpt-4o-mini
+      dimensions:
+        - name: correctness
+          weight: 1.0
+
+test_cases: 10
+parallel: true
+num_workers: 2
+timeout: 15
+
+dataset:
+  name: ci_smoke_tests
+  type: json
+  path: datasets/ci_smoke_tests.json
+
+evaluation_config:
+  retry_on_failure: false
+  error_handling: fail_fast
+  max_duration_seconds: 120
+
+quality_gates:
+  minimum_score: 0.70
+  minimum_coverage: 100
+  fail_on_timeout: true
+
+output_format:
+  format: json
+  include_summary: true
+  include_details: false
+
+cost_control:
+  budget_limit_usd: 1.00
+  track_tokens: true
+  warn_on_excess: true
+
+performance_requirements:
+  max_latency_seconds: 10
+  max_total_time_seconds: 120
+  target_throughput_requests_per_minute: 6
+
+reporting:
+  format: pr_comment
+  post_to_github: true
+  include_metrics: true
+  include_timings: true
+  fail_status: critical
