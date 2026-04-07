@@ -15,7 +15,7 @@
 *Everything you need to evaluate LLMs rigorously, from first principles to CI/CD integration.*
 
 [Explore the Full Documentation](https://a217-anjali.github.io/llm-evaluation-framework/) |
-[View the Portal](https://a217-anjali.github.io/llm-eval-hub/)
+[View the Portal](https://a217-anjali.github.io/llm-evaluation-framework/portal/)
 
 </div>
 

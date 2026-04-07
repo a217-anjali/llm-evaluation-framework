@@ -12,17 +12,17 @@
     <meta property="og:title" content="LLM Evaluation Framework - The Definitive Open-Source Guide">
     <meta property="og:description" content="50+ benchmarks, 25+ evaluation tools, 9 hands-on labs, and production guidance for evaluating large language models.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://a217-anjali.github.io/llm-evaluation-framework/portal/">
-    <meta property="og:image" content="https://a217-anjali.github.io/llm-evaluation-framework/portal/assets/img/og-image.png">
+    <meta property="og:url" content="https://a217-anjali.github.io/llm-eval-hub/">
+    <meta property="og:image" content="https://a217-anjali.github.io/llm-eval-hub/assets/img/og-image.png">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="LLM Evaluation Framework">
     <meta name="twitter:description" content="50+ benchmarks, 25+ tools, and production guidance for LLM evaluation">
-    <meta name="twitter:image" content="https://a217-anjali.github.io/llm-evaluation-framework/portal/assets/img/og-image.png">
+    <meta name="twitter:image" content="https://a217-anjali.github.io/llm-eval-hub/assets/img/og-image.png">
 
     <title>LLM Evaluation Framework - Open-Source Guide & Benchmarks</title>
-    <link rel="canonical" href="https://a217-anjali.github.io/llm-evaluation-framework/portal/">
+    <link rel="canonical" href="https://a217-anjali.github.io/llm-eval-hub/">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -1063,14 +1063,8 @@
         }
 
         .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-
-        .fade-in.visible {
             opacity: 1;
-            transform: translateY(0);
+            transform: none;
         }
 
         /* Responsive */
@@ -1648,7 +1642,7 @@
                 </table>
             </div>
             <div style="text-align: center; margin-top: 60px;">
-                <a href="../docs/04-tooling" class="btn-primary" style="display: inline-block;" target="_blank">Read Full Tooling Guide →</a>
+                <a href="https://github.com/a217-anjali/llm-evaluation-framework/tree/main/docs/04-tooling" class="btn-primary" style="display: inline-block;" target="_blank">Read Full Tooling Guide →</a>
             </div>
         </section>
 
@@ -1666,8 +1660,8 @@
                     <div class="lab-meta">Tools: Python, HuggingFace | ~30 min</div>
                     <p class="lab-desc">Run your first benchmark evaluation. Execute MMLU-Pro against GPT-4 and Llama 2, compare results.</p>
                     <div class="lab-links">
-                        <a href="../docs/05-hands-on/lab-01-basic-benchmark.md">Guide</a>
-                        <a href="../notebooks/lab_01_basic_benchmark.ipynb">Notebook</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/docs/05-hands-on/lab-01-basic-benchmark.md">Guide</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/notebooks/lab_01_basic_benchmark.ipynb">Notebook</a>
                     </div>
                 </div>
 
@@ -1678,8 +1672,8 @@
                     <div class="lab-meta">Tools: DeepEval, Claude | ~40 min</div>
                     <p class="lab-desc">Compare zero-shot vs. chain-of-thought prompting on GSM8K. Measure improvement in mathematical reasoning.</p>
                     <div class="lab-links">
-                        <a href="../docs/05-hands-on/lab-02-llm-as-judge.md">Guide</a>
-                        <a href="../notebooks/lab_02_llm_as_judge.ipynb">Notebook</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/docs/05-hands-on/lab-02-llm-as-judge.md">Guide</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/notebooks/lab_02_llm_as_judge.ipynb">Notebook</a>
                     </div>
                 </div>
 
@@ -1690,8 +1684,8 @@
                     <div class="lab-meta">Tools: Inspect AI, Llama 2 | ~60 min</div>
                     <p class="lab-desc">Build an LLM judge for open-ended responses. Evaluate against reference outputs and criteria-based scoring.</p>
                     <div class="lab-links">
-                        <a href="../docs/05-hands-on/lab-03-rag-eval-pipeline.md">Guide</a>
-                        <a href="../notebooks/lab_03_rag_eval_pipeline.ipynb">Notebook</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/docs/05-hands-on/lab-03-rag-eval-pipeline.md">Guide</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/notebooks/lab_03_rag_eval_pipeline.ipynb">Notebook</a>
                     </div>
                 </div>
 
@@ -1702,8 +1696,8 @@
                     <div class="lab-meta">Tools: HumanEval, HF Transformers | ~50 min</div>
                     <p class="lab-desc">Evaluate code generation with HumanEval. Test function correctness, handle edge cases, measure pass rate.</p>
                     <div class="lab-links">
-                        <a href="../docs/05-hands-on/lab-04-safety-red-team.md">Guide</a>
-                        <a href="../notebooks/lab_04_safety_red_team.ipynb">Notebook</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/docs/05-hands-on/lab-04-safety-red-team.md">Guide</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/notebooks/lab_04_safety_red_team.ipynb">Notebook</a>
                     </div>
                 </div>
 
@@ -1714,8 +1708,8 @@
                     <div class="lab-meta">Tools: Ragas, Chroma, LangChain | ~70 min</div>
                     <p class="lab-desc">Evaluate RAG pipelines. Measure retrieval quality, answer relevance, context precision, and NDCG scores.</p>
                     <div class="lab-links">
-                        <a href="../docs/05-hands-on/lab-05-agentic-eval.md">Guide</a>
-                        <a href="../notebooks/lab_05_agentic_eval.ipynb">Notebook</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/docs/05-hands-on/lab-05-agentic-eval.md">Guide</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/notebooks/lab_05_agentic_eval.ipynb">Notebook</a>
                     </div>
                 </div>
 
@@ -1726,8 +1720,8 @@
                     <div class="lab-meta">Tools: DeepEval, Pydantic | ~80 min</div>
                     <p class="lab-desc">Create custom metrics for your domain. Build parametric metrics, integrate business logic, validate reliability.</p>
                     <div class="lab-links">
-                        <a href="../docs/05-hands-on/lab-06-custom-domain-eval.md">Guide</a>
-                        <a href="../notebooks/lab_06_custom_domain_eval.ipynb">Notebook</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/docs/05-hands-on/lab-06-custom-domain-eval.md">Guide</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/notebooks/lab_06_custom_domain_eval.ipynb">Notebook</a>
                     </div>
                 </div>
 
@@ -1738,8 +1732,8 @@
                     <div class="lab-meta">Tools: GitHub Actions, Langfuse | ~90 min</div>
                     <p class="lab-desc">Build CI/CD evaluation. Auto-evaluate model changes, track metrics over time, alert on degradation.</p>
                     <div class="lab-links">
-                        <a href="../docs/05-hands-on/lab-07-statistical-analysis.md">Guide</a>
-                        <a href="../notebooks/lab_07_statistical_analysis.ipynb">Notebook</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/docs/05-hands-on/lab-07-statistical-analysis.md">Guide</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/notebooks/lab_07_statistical_analysis.ipynb">Notebook</a>
                     </div>
                 </div>
 
@@ -1750,8 +1744,8 @@
                     <div class="lab-meta">Tools: MMBench, GPT-4V | ~100 min</div>
                     <p class="lab-desc">Evaluate vision-language models. Run MMBench, create custom vision metrics, analyze failure modes.</p>
                     <div class="lab-links">
-                        <a href="../docs/05-hands-on/lab-08-eval-ci-cd.md">Guide</a>
-                        <a href="../notebooks/lab_08_eval_ci_cd.ipynb">Notebook</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/docs/05-hands-on/lab-08-eval-ci-cd.md">Guide</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/notebooks/lab_08_eval_ci_cd.ipynb">Notebook</a>
                     </div>
                 </div>
 
@@ -1762,8 +1756,8 @@
                     <div class="lab-meta">Tools: Inspect AI, jailbreak tests | ~120 min</div>
                     <p class="lab-desc">Build adversarial evaluation harness. Test model robustness, measure safety, detect prompt injection.</p>
                     <div class="lab-links">
-                        <a href="../docs/05-hands-on/lab-09-model-selection-pareto.md">Guide</a>
-                        <a href="../notebooks/lab_09_model_selection_pareto.ipynb">Notebook</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/docs/05-hands-on/lab-09-model-selection-pareto.md">Guide</a>
+                        <a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/notebooks/lab_09_model_selection_pareto.ipynb">Notebook</a>
                     </div>
                 </div>
             </div>
@@ -1810,7 +1804,7 @@ Model Selection → Benchmarking → Continuous Eval → Production Monitoring
                 Deploy evaluation as a first-class system. Monitor model quality continuously. Alert on degradation. Govern rigorously. Scale with confidence.
             </p>
             <div style="text-align: center; margin-top: 40px;">
-                <a href="../docs/06-production" class="btn-primary" style="display: inline-block;" target="_blank">Read Production Guide →</a>
+                <a href="https://github.com/a217-anjali/llm-evaluation-framework/tree/main/docs/06-production" class="btn-primary" style="display: inline-block;" target="_blank">Read Production Guide →</a>
             </div>
         </section>
 
@@ -1896,7 +1890,7 @@ Model Selection → Benchmarking → Continuous Eval → Production Monitoring
             </ol>
 
             <div style="text-align: center; margin-bottom: 80px;">
-                <a href="../docs/07-references" class="btn-primary" style="display: inline-block;" target="_blank">View All 60+ References</a>
+                <a href="https://github.com/a217-anjali/llm-evaluation-framework/tree/main/docs/07-references" class="btn-primary" style="display: inline-block;" target="_blank">View All 60+ References</a>
             </div>
         </section>
 
@@ -2064,9 +2058,9 @@ Model Selection → Benchmarking → Continuous Eval → Production Monitoring
                 <div class="footer-section">
                     <h4>Community</h4>
                     <ul class="footer-links">
-                        <li><a href="../CONTRIBUTING.md">Contributing Guide</a></li>
-                        <li><a href="../CODE_OF_CONDUCT.md">Code of Conduct</a></li>
-                        <li><a href="../LICENSE">Apache 2.0 License</a></li>
+                        <li><a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/CONTRIBUTING.md">Contributing Guide</a></li>
+                        <li><a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a></li>
+                        <li><a href="https://github.com/a217-anjali/llm-evaluation-framework/blob/main/LICENSE">Apache 2.0 License</a></li>
                         <li><a href="https://github.com/a217-anjali/llm-evaluation-framework/security/policy">Security Policy</a></li>
                     </ul>
                 </div>
