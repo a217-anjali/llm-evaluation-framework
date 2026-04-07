@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cost in LLM Evaluation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: background-color 0.3s ease;
+        }
+
+        nav a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            color: var(--color-accent);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header Section */
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.8rem;
+            background-color: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .metric-card h3 {
+            margin-top: 0;
+            color: var(--color-accent);
+            font-size: 1.2rem;
+        }
+
+        .metric-card .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .metric-card .description,
+        .metric-card .calculation {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-card .description {
+            color: var(--color-text-secondary);
+        }
+
+        .metric-card .calculation {
+            color: var(--color-accent-light);
+        }
+
+        /* Comparison Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        table thead {
+            background-color: var(--color-bg);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        table th {
+            padding: 1rem;
+            text-align: left;
+            color: var(--color-accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        table td {
+            padding: 1rem;
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        table tbody tr:hover {
+            background-color: var(--color-bg);
+            transition: background-color 0.2s ease;
+        }
+
+        /* Strategy Boxes */
+        .strategy-box {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .strategy-box:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .strategy-box h4 {
+            color: var(--color-accent);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .strategy-box p {
+            margin-bottom: 0;
+        }
+
+        /* Tips Section */
+        .tips-list {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tips-list li {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .resource-link {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-link strong {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-link-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.1);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--color-accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.95rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            table th, table td {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">← Back to Framework</a>
+        <div class="nav-right">
+            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>Cost in LLM Evaluation</h1>
+            <p class="subtitle">Optimizing evaluation spend without sacrificing quality</p>
+        </header>
+
+        <!-- Section 1: What is Cost in LLM Evaluation? -->
+        <section id="what-is-cost">
+            <h2>What is Cost in LLM Evaluation?</h2>
+            <p>Evaluation isn't free. Behind every model assessment lies a combination of direct and hidden expenses that can quickly accumulate:</p>
+            <ul>
+                <li><strong>API Call Costs:</strong> Pay-per-token pricing from providers like OpenAI, Anthropic, or cloud-hosted models. A single evaluation run across thousands of test cases can cost hundreds or thousands of dollars.</li>
+                <li><strong>Compute for Local Models:</strong> GPU hours for running open-source models (Llama, Mistral, etc.) on your infrastructure. Cloud compute (EC2, A100 instances) can run $1-$3 per GPU-hour.</li>
+                <li><strong>Human Annotator Time:</strong> Expert annotators cost $30-100+ per hour; crowd workers cost $5-15 per hour. A comprehensive human evaluation of 1,000 samples can exceed $5,000.</li>
+                <li><strong>Infrastructure:</strong> Vector databases, caching systems, monitoring dashboards, and API orchestration require maintenance and scaling costs.</li>
+                <li><strong>Data Labeling & Preparation:</strong> Cleaning, formatting, and annotating benchmark datasets before evaluation can rival evaluation costs themselves.</li>
+            </ul>
+            <p><strong>The Total Cost of Evaluation (TCE) concept:</strong> TCE is the full price tag of assessing a single model or model variant, including all direct costs and infrastructure overhead amortized across evaluation runs. For many teams, TCE per model can range from $500 to $50,000+ depending on evaluation scope.</p>
+            <p><strong>Cost of Evaluation vs. Cost of NOT Evaluating:</strong> Deploying an inaccurate, unsafe, or inefficient LLM to production can cost far more—through lost users, regulatory fines, brand damage, or catastrophic errors. Thorough pre-release evaluation is a form of risk insurance.</p>
+        </section>
+
+        <!-- Section 2: Why Cost Matters -->
+        <section id="why-cost-matters">
+            <h2>Why Cost Matters</h2>
+            <h3>Budget Constraints Across Team Sizes</h3>
+            <p>Evaluation budgets vary dramatically. Startups might have $1,000-10,000 total budget for evaluation infrastructure. Large enterprises can allocate millions but still face pressure to demonstrate ROI. The cost-per-evaluation directly impacts how many models you can test and how rapidly you can iterate.</p>
+            <h3>Scaling with Model Iteration Cycles</h3>
+            <p>Modern ML development involves rapid iteration: prompt tuning, fine-tuning attempts, new model versions released weekly. If each evaluation cycle costs $5,000, you can afford 20 cycles per year. If it costs $500, you can run 200. Cost efficiency is directly tied to development velocity.</p>
+            <h3>Comprehensive Evaluation at Scale</h3>
+            <p>Benchmark suites like MMLU, TruthfulQA, or custom domain datasets can contain thousands or tens of thousands of examples. Evaluating against all of them with multiple metrics (accuracy, latency, safety) can easily exceed budgets, forcing teams to sample or skip critical checks.</p>
+            <h3>Hidden Costs That Compound</h3>
+            <p>Beyond direct API/compute costs, infrastructure maintenance, tooling subscriptions, data engineering effort, and domain expert time add up. Many teams underestimate TCE by 50-100% because they don't track indirect costs.</p>
+            <h3>The Cost-Quality Tradeoff Curve</h3>
+            <p>There's a real tradeoff: cheaper evaluation methods (like LLM-as-Judge) sacrifice coverage or rigor. More comprehensive evaluation (100% human review) costs prohibitively. The optimal point depends on stakes: high-risk applications justify higher spend; proof-of-concept work demands low cost.</p>
+        </section>
+
+        <!-- Section 3: Key Metrics -->
+        <section id="key-metrics">
+            <h2>Key Metrics</h2>
+            <p>Understanding cost requires breaking it down into measurable components:</p>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Cost per Evaluation</h3>
+                    <p>Total dollars spent to fully assess one model variant, including all API calls, compute, and human time.</p>
+                    <div class="label">Typical Range</div>
+                    <div class="value">$500 - $50,000 per model (varies by scope)</div>
+                    <div class="label">Key Insight</div>
+                    <div class="calculation">Tracks total TCE and aids budget forecasting for iteration cycles</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Cost per Token</h3>
+                    <p>Price per token when using API-based models, enabling apples-to-apples comparison across providers.</p>
+                    <div class="label">Example Rates</div>
+                    <div class="value">GPT-4: $0.03/1K input, $0.06/1K output tokens</div>
+                    <div class="label">Key Insight</div>
+                    <div class="calculation">For 1M input tokens: $30. For 1M output tokens: $60. Watch for expensive models on large datasets.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Human Annotation Cost</h3>
+                    <p>Hourly or per-sample cost for expert vs. crowd-sourced annotation.</p>
+                    <div class="label">Typical Rates</div>
+                    <div class="value">Expert: $50-100/hr | Crowd: $5-15/hr | Specialist: $100-300/hr</div>
+                    <div class="label">Key Insight</div>
+                    <div class="calculation">1,000 samples at 5 min/sample: 83 hours. Expert: $4,150. Crowd: $830. Choose based on quality needs.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Compute Cost</h3>
+                    <p>GPU-hour costs for running local or open-source models on cloud infrastructure.</p>
+                    <div class="label">Cloud Pricing</div>
+                    <div class="value">A10G: $0.35/hr | A100 (40GB): $3.06/hr | H100: $7.09/hr</div>
+                    <div class="label">Key Insight</div>
+                    <div class="calculation">Evaluating 50k samples on H100: ~10 GPU-hours = $70. But CPU overhead and queueing time multiplies this.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Cost Efficiency Ratio</h3>
+                    <p>Measurable improvement in accuracy or safety per dollar spent on evaluation and improvement.</p>
+                    <div class="label">Formula</div>
+                    <div class="value">Accuracy Gain (%) / Evaluation Spend ($)</div>
+                    <div class="label">Key Insight</div>
+                    <div class="calculation">Spend $5,000 to gain 2% accuracy = 0.0004 gain/$. Spend $500 to gain 1% = 0.002 gain/$. Which is better ROI?</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>ROI of Evaluation</h3>
+                    <p>Cost of bugs or failures caught by evaluation vs. the cost of deploying flawed models.</p>
+                    <div class="label">Real Example</div>
+                    <div class="value">Evaluation spend: $10,000 | Bug caught (prevented production failure): $500,000 loss avoided</div>
+                    <div class="label">Key Insight</div>
+                    <div class="calculation">ROI = 50x. Evaluation is cheap insurance if it catches even one critical issue.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Cost Optimization Strategies -->
+        <section id="optimization-strategies">
+            <h2>Cost Optimization Strategies</h2>
+
+            <div class="strategy-box">
+                <h4>Tiered Evaluation (Funnel Approach)</h4>
+                <p>Run cheap automated evaluation first (syntax, basic checks—cost: $100), then cheaper LLM judges on promising candidates (cost: $500-1,000), and reserve expensive human evaluation for finalists only (cost: $5,000). This cuts total spend by 70-80% while keeping quality high for top candidates.</p>
+            </div>
+
+            <div class="strategy-box">
+                <h4>Smart Sampling</h4>
+                <p>Evaluate on representative subsets instead of full datasets. Stratified sampling of 10% of MMLU can provide accurate signal while costing 90% less. Use power analysis to determine minimum sample size needed for statistically significant results.</p>
+            </div>
+
+            <div class="strategy-box">
+                <h4>Caching and Memoization</h4>
+                <p>Store evaluation results for identical inputs. If you re-evaluate the same model on the same benchmark, cache previous results. If you evaluate multiple prompts for the same model, deduplicate API calls. Potential savings: 20-40% on compute.</p>
+            </div>
+
+            <div class="strategy-box">
+                <h4>Open-Source Tools vs. Commercial Platforms</h4>
+                <p>Open-source tools (lm-eval-harness, Inspect AI) have zero marginal cost after setup. Commercial platforms (LangSmith, Braintrust) cost $100-1,000+ monthly but provide managed infrastructure and monitoring. For <$10k annual evaluation spend, open-source wins. For mature, high-volume programs, managed platforms save engineering time.</p>
+            </div>
+
+            <div class="strategy-box">
+                <h4>LLM-as-Judge Instead of Human Evaluation</h4>
+                <p>Replace 10-100x expensive human evaluation with LLM judges (Claude, GPT-4) for subjective tasks. Cost: $1-5 per sample vs. $10-50 for human. Trade: slightly lower reliability but dramatically better economics. Works well for most use cases; risky for high-stakes domains.</p>
+            </div>
+
+            <div class="strategy-box">
+                <h4>Batch API Pricing for High-Volume Evaluation</h4>
+                <p>Use OpenAI's Batch API (50% discount) or similar services for non-time-sensitive evaluation. Cost: $0.015 vs. $0.03 per 1K input tokens. For 1B tokens of evaluation: $15,000 saved. Trade: 24-48 hour latency.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Tool Cost Comparison -->
+        <section id="tool-comparison">
+            <h2>Tool Cost Comparison</h2>
+            <p>Below is an approximate cost breakdown for a typical evaluation pipeline evaluating 5 models on a 10,000-sample benchmark, combining automated + human assessment:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tool / Platform</th>
+                        <th>Licensing</th>
+                        <th>API Calls</th>
+                        <th>Compute</th>
+                        <th>Monthly Min.</th>
+                        <th>TCE per Model</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Inspect AI</strong></td>
+                        <td>Free (open-source)</td>
+                        <td>$500 (OpenAI calls)</td>
+                        <td>$50 (local GPU)</td>
+                        <td>$0</td>
+                        <td>$550</td>
+                    </tr>
+                    <tr>
+                        <td><strong>lm-eval-harness</strong></td>
+                        <td>Free (open-source)</td>
+                        <td>$300 (API costs)</td>
+                        <td>$30 (local)</td>
+                        <td>$0</td>
+                        <td>$330</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DeepEval</strong></td>
+                        <td>Free (tier) / $99+</td>
+                        <td>$500 (external APIs)</td>
+                        <td>$50</td>
+                        <td>$0-99</td>
+                        <td>$550-650</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LangSmith</strong></td>
+                        <td>Free (trial) / $300+</td>
+                        <td>$500 (model calls)</td>
+                        <td>$50 (managed)</td>
+                        <td>$300</td>
+                        <td>$850</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Braintrust</strong></td>
+                        <td>Free (trial) / $1,000+</td>
+                        <td>$500 (eval calls)</td>
+                        <td>Included</td>
+                        <td>$500-1,000</td>
+                        <td>$1,000-1,500</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Langfuse</strong></td>
+                        <td>Free (open-source) / Hosted</td>
+                        <td>$500</td>
+                        <td>$50 (self-hosted)</td>
+                        <td>$0-99</td>
+                        <td>$550</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Custom Pipeline</strong></td>
+                        <td>$0</td>
+                        <td>$500 (APIs)</td>
+                        <td>$100+ (engineering)</td>
+                        <td>$0</td>
+                        <td>$600+</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Analysis</h3>
+            <p><strong>For cost-conscious teams:</strong> lm-eval-harness or Inspect AI are free and work well for standard benchmarks. Hosting and managing evaluations in-house keeps TCE low.</p>
+            <p><strong>For rapid development:</strong> DeepEval's free tier or LangSmith's managed experience reduce engineering overhead. Pay the platform tax ($300-500/month) to iterate faster.</p>
+            <p><strong>For enterprise scale:</strong> Braintrust and similar platforms justify cost through integration, monitoring, and team collaboration features. TCE per model amortizes over hundreds of evaluations.</p>
+        </section>
+
+        <!-- Section 6: Practical Tips -->
+        <section id="practical-tips">
+            <h2>Practical Tips for Managing Evaluation Cost</h2>
+
+            <div class="tips-list">
+                <ul>
+                    <li><strong>Define Your Evaluation Budget Upfront:</strong> Set a total annual evaluation budget and allocate it across iteration cycles. This prevents cost overruns and forces prioritization of what to evaluate.</li>
+
+                    <li><strong>Track TCE Religiously:</strong> Log every evaluation run: API costs, compute hours, human time, infrastructure. Use spreadsheets or tools to aggregate. You'll spot inefficiencies and identify where most spend goes.</li>
+
+                    <li><strong>Negotiate Bulk Discounts:</strong> If using OpenAI or other APIs heavily, contact enterprise sales for volume discounts. AWS and GCP offer commitment discounts for compute. Savings: 20-50%.</li>
+
+                    <li><strong>Use Cheaper Models for Evaluation:</strong> Claude 3.5 Haiku or GPT-4 Mini often perform as well as flagship models on evaluation tasks while costing 10x less. Reserve expensive models for production use.</li>
+
+                    <li><strong>Parallelize Evaluation Runs:</strong> Distribute evaluation across multiple machines/GPUs. If one run takes 100 GPU-hours, parallelizing across 10 GPUs drops time to 10 hours and cost scales the same way.</li>
+
+                    <li><strong>Establish Cost Thresholds for Go/No-Go Decisions:</strong> Define rules: if evaluation cost exceeds $5,000 and accuracy gain is <0.5%, don't proceed. This prevents endless tuning and scope creep.</li>
+
+                    <li><strong>Combine Multiple Evaluation Methods:</strong> Don't rely on just LLM judges or just humans or just automated metrics. A hybrid approach (80% LLM judge, 20% human spot-check) is cheaper than 100% human and more reliable than LLM-only.</li>
+
+                    <li><strong>Evaluate Smart Candidates Only:</strong> Use fast, cheap heuristics (code lint, basic output validation) to filter bad candidates before expensive evaluation. This reduces evaluation volume significantly.</li>
+
+                    <li><strong>Reuse Evaluation Datasets:</strong> Build a library of internal benchmarks relevant to your domain. Standardize on these to enable year-over-year comparisons. Eliminates the need to create new datasets repeatedly.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 7: Related Resources -->
+        <section id="resources">
+            <h2>Related Resources</h2>
+
+            <div class="resources-grid">
+                <a href="index.html" class="resource-link">
+                    <strong>← Framework Overview</strong>
+                    <p>Return to the main LLM Evaluation Framework</p>
+                    <span class="resource-link-label">Core</span>
+                </a>
+
+                <a href="index.html#tools" class="resource-link">
+                    <strong>Tools & Platforms</strong>
+                    <p>Complete guide to evaluation platforms and their cost structures</p>
+                    <span class="resource-link-label">Tools</span>
+                </a>
+
+                <a href="index.html#production" class="resource-link">
+                    <strong>Production Evaluation</strong>
+                    <p>How to maintain evaluation in production and manage ongoing costs</p>
+                    <span class="resource-link-label">Reference</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Other Pillars</strong>
+                    <p>Explore related pillars: Accuracy, Safety, Efficiency, Robustness</p>
+                    <span class="resource-link-label">Explore</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Benchmarks & Datasets</strong>
+                    <p>Popular evaluation datasets and their associated costs</p>
+                    <span class="resource-link-label">Reference</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <p>LLM Evaluation Framework | Cost Pillar</p>
+        <p>Part of the comprehensive guide to evaluating large language models. <a href="index.html">Learn more</a></p>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark-mode');
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeToggleIcon();
+        });
+
+        function updateThemeToggleIcon() {
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Load theme preference
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            htmlElement.classList.remove('dark-mode');
+        }
+        updateThemeToggleIcon();
+
+        // Back to top button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

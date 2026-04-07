@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accuracy in LLM Evaluation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: background-color 0.3s ease;
+        }
+
+        nav a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            color: var(--color-accent);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header Section */
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.8rem;
+            background-color: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .metric-card h3 {
+            margin-top: 0;
+            color: var(--color-accent);
+            font-size: 1.2rem;
+        }
+
+        .metric-card .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .metric-card .when-to-use,
+        .metric-card .pitfalls {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-card .when-to-use {
+            color: var(--color-accent-light);
+        }
+
+        .metric-card .pitfalls {
+            color: #ff9999;
+        }
+
+        /* Benchmarks */
+        .benchmarks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .benchmark-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .benchmark-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .benchmark-item strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .benchmark-item p {
+            margin-bottom: 0;
+        }
+
+        /* Tips Section */
+        .tips-list {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tips-list li {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .resource-link {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-link strong {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-link-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.1);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--color-accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.95rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .benchmarks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">← Back to Framework</a>
+        <div class="nav-right">
+            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>Accuracy in LLM Evaluation</h1>
+            <p class="subtitle">Measuring how well models produce correct, relevant, and faithful outputs</p>
+        </header>
+
+        <!-- Section 1: What is Accuracy? -->
+        <section id="what-is-accuracy">
+            <h2>What is Accuracy?</h2>
+            <p>In the context of LLMs, accuracy transcends the traditional machine learning definition of "correct predictions on test data." It encompasses a multidimensional understanding of output quality:</p>
+            <ul>
+                <li><strong>Factual Correctness:</strong> Does the model produce statements that align with established facts and world knowledge?</li>
+                <li><strong>Semantic Relevance:</strong> Does the response directly address the question or prompt in a meaningful way?</li>
+                <li><strong>Faithfulness:</strong> In retrieval-augmented generation (RAG) systems, does the response stay grounded in the provided context without fabricating information?</li>
+                <li><strong>Output Quality:</strong> Is the answer complete, coherent, and useful to the user?</li>
+            </ul>
+            <p>Unlike binary classification accuracy, LLM accuracy is often probabilistic and context-dependent. A model may produce a partially correct answer that's still valuable, or a technically accurate answer that misses the user's intent.</p>
+        </section>
+
+        <!-- Section 2: Why Accuracy Matters -->
+        <section id="why-accuracy-matters">
+            <h2>Why Accuracy Matters</h2>
+            <h3>Production Risks</h3>
+            <p>Inaccurate LLM outputs can cause real harm in high-stakes domains:</p>
+            <ul>
+                <li><strong>Healthcare:</strong> Incorrect medical information can lead to misdiagnosis or improper treatment recommendations</li>
+                <li><strong>Legal:</strong> Hallucinated case law or contract terms can expose organizations to liability</li>
+                <li><strong>Financial:</strong> False market data or investment advice can lead to significant losses</li>
+            </ul>
+            <h3>User Trust & Adoption</h3>
+            <p>Every hallucination or factually incorrect response erodes user confidence. Studies show that even a single inaccuracy can significantly reduce trust in the entire system, making accuracy a foundational requirement for reliable deployment.</p>
+            <h3>Downstream Decision Quality</h3>
+            <p>LLM outputs often feed into critical business processes—from customer support to data analysis. Inaccurate inputs compound errors throughout the pipeline, amplifying the impact of even small accuracy gaps.</p>
+            <h3>Regulatory Compliance</h3>
+            <p>The EU AI Act and similar regulations increasingly mandate accuracy thresholds for high-risk AI systems. Demonstrating measurable accuracy improvements is now a compliance requirement, not just a nice-to-have.</p>
+        </section>
+
+        <!-- Section 3: Key Metrics -->
+        <section id="key-metrics">
+            <h2>Key Metrics</h2>
+            <p>Each metric captures a different dimension of accuracy. None is perfect alone—use them in combination:</p>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Exact Match (EM)</h3>
+                    <p>Whether the model output exactly matches a reference answer (character-level comparison).</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Factoid QA, short answers, standardized test questions</div>
+                    <div class="label">Formula Intuition</div>
+                    <div class="value">EM = (# exact matches) / (# total samples) × 100%</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Too strict for open-ended answers; misses semantically correct paraphrases</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>F1 Score</h3>
+                    <p>Token-level overlap between prediction and reference answer, balancing precision and recall.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Extractive QA, span-based answers, evaluating partial correctness</div>
+                    <div class="label">Formula Intuition</div>
+                    <div class="value">F1 = 2 × (Precision × Recall) / (Precision + Recall)</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Doesn't capture word order or semantic meaning; treats all tokens equally</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>BLEU Score</h3>
+                    <p>N-gram overlap between generated and reference text, commonly used in machine translation.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Translation, summarization, text generation tasks</div>
+                    <div class="label">Formula Intuition</div>
+                    <div class="value">BLEU = exp(Σ log(pₙ)) where pₙ = (# matched n-grams) / (# n-grams)</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Doesn't correlate well with human judgment; punishes valid paraphrases</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>ROUGE Score</h3>
+                    <p>Recall-focused n-gram overlap, widely used for summarization evaluation.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Abstractive summarization, document generation</div>
+                    <div class="label">Formula Intuition</div>
+                    <div class="value">ROUGE-N = Σ(matched N-grams) / Σ(total reference N-grams)</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Length-biased; doesn't penalize factual errors if n-grams overlap</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>BERTScore</h3>
+                    <p>Semantic similarity via contextual embeddings, capturing meaning beyond surface-level n-grams.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Open-ended generation, paraphrase detection, semantic evaluation</div>
+                    <div class="label">Formula Intuition</div>
+                    <div class="value">BERTScore = avg(cos_similarity(embedding_pred, embedding_ref))</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Doesn't guarantee factual accuracy; sensitive to embedding model quality</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Faithfulness</h3>
+                    <p>Degree to which the output is grounded in and consistent with provided source material (critical for RAG).</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">RAG systems, document-grounded QA, citation-required tasks</div>
+                    <div class="label">Formula Intuition</div>
+                    <div class="value">Faithfulness = (# claims supported by context) / (# total claims)</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Requires careful claim extraction; varies by evaluator interpretation</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Factual Consistency</h3>
+                    <p>Alignment with ground-truth world knowledge, independent of context.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Open-domain QA, hallucination detection, knowledge-intensive tasks</div>
+                    <div class="label">Formula Intuition</div>
+                    <div class="value">FC = (# factually consistent claims) / (# total factual claims)</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Requires access to reliable knowledge base; expensive to evaluate at scale</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Benchmarks for Accuracy -->
+        <section id="benchmarks">
+            <h2>Benchmarks for Accuracy</h2>
+            <p>These standardized benchmarks allow you to compare model accuracy against published baselines:</p>
+
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>MMLU-Pro</strong>
+                    <p>Massive multitask language understanding (professional-level). 12k+ questions across STEM, humanities, law, medicine. Measures factual knowledge accuracy.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>TruthfulQA</strong>
+                    <p>Evaluates model tendencies to produce true vs. false statements. Designed to catch hallucinations and confabulated knowledge. Tests factuality under real-world ambiguity.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>HaluEval</strong>
+                    <p>Synthetic benchmark specifically for hallucination detection. Tests generative, factuality, and idiomatic hallucinations. Critical for production safety.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>SimpleQA</strong>
+                    <p>Factual QA benchmark with simple, unambiguous answers. Evaluates straightforward factual recall without relying on complex reasoning. Lower bound for accuracy.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>FreshQA</strong>
+                    <p>Tests temporal accuracy—how well models handle recent, time-sensitive information. Reveals knowledge cutoff limitations and outdated training data issues.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>RAGAS</strong>
+                    <p>RAG Assessment. Measures retrieval-augmented generation accuracy including context relevance, faithfulness, and answer relevance together.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Practical Tips -->
+        <section id="practical-tips">
+            <h2>Practical Tips</h2>
+
+            <div class="tips-list">
+                <ul>
+                    <li><strong>Use Multiple Metrics:</strong> No single metric captures accuracy fully. Combine EM, F1, semantic similarity (BERTScore), and domain-specific metrics. A model might score well on BLEU but fail on factuality.</li>
+
+                    <li><strong>Always Include Human Evaluation:</strong> Automated metrics are proxies, not ground truth. Human evaluators should assess a stratified sample (~5-10% of data) to calibrate automated scores and catch metric blind spots.</li>
+
+                    <li><strong>Test on Adversarial Inputs:</strong> Evaluate accuracy on edge cases, out-of-distribution inputs, and adversarial examples. A model with 95% accuracy on clean data might collapse to 60% on adversarial inputs.</li>
+
+                    <li><strong>Monitor Accuracy Drift in Production:</strong> Set up ongoing evaluation pipelines. Accuracy degrades over time as user queries shift, knowledge becomes outdated, and model behavior drifts. Monitor weekly or monthly.</li>
+
+                    <li><strong>Set Minimum Accuracy Thresholds:</strong> Define what "good enough" looks like for your use case before deployment. For healthcare: 98%+. For customer support: 90%+. For creative writing: 70%+. Make this explicit in requirements.</li>
+
+                    <li><strong>Disaggregate by Subgroup:</strong> Report accuracy not just overall, but by demographic group, topic, question difficulty, or language. A model might be 92% accurate overall but only 70% accurate for non-English queries.</li>
+
+                    <li><strong>Use Evaluation as a Development Tool:</strong> Run accuracy evaluation early and often during development. Use results to identify high-error patterns and prioritize model improvements or data collection.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 6: Related Resources -->
+        <section id="resources">
+            <h2>Related Resources</h2>
+
+            <div class="resources-grid">
+                <a href="index.html" class="resource-link">
+                    <strong>← Framework Overview</strong>
+                    <p>Return to the main LLM Evaluation Framework</p>
+                    <span class="resource-link-label">Core</span>
+                </a>
+
+                <a href="index.html#metrics-deep-dive" class="resource-link">
+                    <strong>Metrics Deep Dive</strong>
+                    <p>In-depth technical guide to accuracy metrics with formulas and code examples</p>
+                    <span class="resource-link-label">Technical</span>
+                </a>
+
+                <a href="index.html#benchmarks" class="resource-link">
+                    <strong>Benchmarks Section</strong>
+                    <p>Complete list of evaluation benchmarks with links and leaderboards</p>
+                    <span class="resource-link-label">Reference</span>
+                </a>
+
+                <a href="index.html#labs" class="resource-link">
+                    <strong>Labs & Tools</strong>
+                    <p>Interactive tools and notebooks for evaluating accuracy on your own models</p>
+                    <span class="resource-link-label">Tools</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Other Pillars</strong>
+                    <p>Explore related pillars: Efficiency, Robustness, Fairness, Interpretability</p>
+                    <span class="resource-link-label">Explore</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <p>LLM Evaluation Framework | Accuracy Pillar</p>
+        <p>Part of the comprehensive guide to evaluating large language models. <a href="index.html">Learn more</a></p>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark-mode');
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeToggleIcon();
+        });
+
+        function updateThemeToggleIcon() {
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Load theme preference
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            htmlElement.classList.remove('dark-mode');
+        }
+        updateThemeToggleIcon();
+
+        // Back to top button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

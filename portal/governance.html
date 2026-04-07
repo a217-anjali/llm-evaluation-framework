@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Governance in LLM Evaluation - LLM Eval Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sticky Navigation */
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--color-accent-dark);
+        }
+
+        .theme-toggle {
+            width: 48px;
+            height: 28px;
+            border-radius: 14px;
+            border: 2px solid var(--color-border);
+            background-color: var(--color-bg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--color-accent);
+        }
+
+        .toggle-circle {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background-color: var(--color-accent);
+            transition: transform 0.3s;
+        }
+
+        html.dark-mode .toggle-circle {
+            transform: translateX(20px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--color-text);
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--color-accent);
+            display: inline-block;
+        }
+
+        .section-content {
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+            line-height: 1.8;
+        }
+
+        .section-content p {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-content ul, .section-content ol {
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-content li {
+            margin-bottom: 0.8rem;
+        }
+
+        .section-content strong {
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+        /* Component Cards */
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .component-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .component-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .component-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 0.75rem;
+        }
+
+        .component-description {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Regulatory Items */
+        .regulatory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .regulatory-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: background-color 0.2s;
+        }
+
+        .regulatory-item:hover {
+            background-color: rgba(135, 206, 235, 0.1);
+        }
+
+        .regulatory-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .regulatory-description {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Building Steps */
+        .steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .step-item {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            border-left: 4px solid var(--color-accent-light);
+        }
+
+        .step-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .step-description {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Resources Section */
+        .resources-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .resource-link {
+            display: inline-block;
+            padding: 0.75rem 1.25rem;
+            background-color: var(--color-bg-secondary);
+            color: var(--color-accent);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-accent);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-lg);
+            z-index: 50;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: translateY(-4px);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1.5rem;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+
+            .components-grid, .regulatory-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-bar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .nav-left, .nav-bar > div:last-child {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <div class="nav-left">
+            <a href="index.html" class="nav-link">← Back to Framework</a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <div class="toggle-circle"></div>
+        </button>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="title">Governance in LLM Evaluation</h1>
+            <p class="subtitle">Establishing standards, policies, and oversight for responsible AI evaluation</p>
+        </div>
+
+        <!-- Section 1: What is Governance? -->
+        <section class="section">
+            <h2 class="section-title">What is Governance?</h2>
+            <div class="section-content">
+                <p>
+                    Governance in LLM evaluation refers to the organizational framework for managing AI evaluation: who evaluates, what standards apply, how results are documented, who approves deployment, and how disputes are resolved. Governance is the <strong>bridge between technical evaluation and business decision-making</strong>.
+                </p>
+                <p>
+                    Unlike evaluation metrics (which measure model performance), governance defines the <strong>processes, roles, and policies</strong> that ensure evaluation is conducted consistently, transparently, and with appropriate oversight. A well-governed evaluation program means:
+                </p>
+                <ul>
+                    <li><strong>Clear Ownership:</strong> Everyone knows who is responsible for different aspects of evaluation—model developers, product teams, compliance officers, risk teams.</li>
+                    <li><strong>Standardized Procedures:</strong> Evaluation follows documented protocols rather than ad-hoc approaches, reducing bias and improving reproducibility.</li>
+                    <li><strong>Audit Trails:</strong> Complete records of what was tested, how, and why—critical for regulatory compliance and post-deployment accountability.</li>
+                    <li><strong>Decision Gates:</strong> Formal approval processes before deployment prevent unsafe or inadequately tested models from reaching production.</li>
+                    <li><strong>Dispute Resolution:</strong> Mechanisms to handle disagreements about evaluation results or go/no-go decisions without bottlenecking progress.</li>
+                </ul>
+                <p>
+                    Governance is essential because technical excellence in evaluation means nothing if results are ignored, misinterpreted, or excluded from decision-making.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 2: Why Governance Matters -->
+        <section class="section">
+            <h2 class="section-title">Why Governance Matters</h2>
+            <div class="section-content">
+                <p>
+                    Without governance, even rigorous evaluation becomes ineffective. Here's why governance structures are critical:
+                </p>
+                <ul>
+                    <li><strong>Regulatory Compliance:</strong> The EU AI Act mandates evaluation documentation and clear ownership for high-risk systems. NIST's AI RMF requires documented evaluation processes. Without governance, organizations cannot demonstrate compliance when audited or investigated.</li>
+                    <li><strong>Audit Trails & Accountability:</strong> When AI systems fail in production, regulators and courts demand to know: What was tested? Who approved it? What risks were known? Governance creates evidence. Without it, organizations face legal liability and reputational damage.</li>
+                    <li><strong>Preventing Evaluation Shopping:</strong> Without oversight, teams can cherry-pick favorable evaluation results while ignoring negative findings. Governance requires all evaluation results—good and bad—to inform deployment decisions, preventing confirmation bias.</li>
+                    <li><strong>Standardization Across Teams:</strong> Large organizations with multiple ML teams need consistent evaluation standards. Governance prevents fragmentation where different teams use incomparable metrics or methodologies, making it impossible to compare model safety across the organization.</li>
+                    <li><strong>Cross-Functional Alignment:</strong> ML engineers, product managers, compliance, legal, and risk teams may have conflicting priorities. Governance establishes decision-making authority and escalation paths, preventing deadlock.</li>
+                    <li><strong>Long-Term Maintainability:</strong> Governance documents enable continuity when team members leave. New evaluators can understand historical decisions, baselines, and rationale rather than starting from scratch.</li>
+                </ul>
+                <p>
+                    <strong>Real-world example:</strong> An AI chatbot company deploys a model that generates biased hiring recommendations. In the investigation, regulators discover the company ran bias evaluations but ignored results dismissing them as "acceptable risk." Without governance (who approved this risk? based on what criteria?), the company faces fines and forced remediation. With documented governance, they can demonstrate good-faith decision-making and potentially mitigate penalties.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 3: Key Components -->
+        <section class="section">
+            <h2 class="section-title">Key Governance Components</h2>
+            <div class="section-content">
+                <p>
+                    Effective LLM evaluation governance includes these core elements:
+                </p>
+            </div>
+            <div class="components-grid">
+                <!-- Evaluation Policy -->
+                <div class="component-card">
+                    <div class="component-title">Evaluation Policy</div>
+                    <div class="component-description">
+                        Written standards defining what must be evaluated, acceptable thresholds for deployment, required test coverage, and decision criteria. Example: "All language models must achieve <95% toxicity score before production deployment."
+                    </div>
+                </div>
+
+                <!-- Model Cards -->
+                <div class="component-card">
+                    <div class="component-title">Model Cards</div>
+                    <div class="component-description">
+                        Standardized documentation of model capabilities, limitations, training data, evaluation results, known risks, and appropriate use cases. Designed to be human-readable and externally publishable.
+                    </div>
+                </div>
+
+                <!-- Audit Trails -->
+                <div class="component-card">
+                    <div class="component-title">Audit Trails</div>
+                    <div class="component-description">
+                        Complete records of all evaluation runs including: datasets used, metrics calculated, who ran the evaluation, timestamps, results, and who accessed/modified this data. Enables post-deployment analysis and regulatory audits.
+                    </div>
+                </div>
+
+                <!-- Approval Gates -->
+                <div class="component-card">
+                    <div class="component-title">Approval Gates</div>
+                    <div class="component-description">
+                        Formal go/no-go criteria before production deployment. Gates typically include: minimum evaluation coverage, threshold metrics, review board sign-off, and escalation procedures for borderline cases.
+                    </div>
+                </div>
+
+                <!-- Role Definitions -->
+                <div class="component-card">
+                    <div class="component-title">Role Definitions</div>
+                    <div class="component-description">
+                        Clear responsibilities: Who owns model training? Who conducts evaluation? Who interprets results? Who makes go/no-go decisions? Who handles escalations? Prevents gaps and reduces blame-shifting when issues arise.
+                    </div>
+                </div>
+
+                <!-- Version Control -->
+                <div class="component-card">
+                    <div class="component-title">Version Control</div>
+                    <div class="component-description">
+                        Tracking of model versions, dataset versions, metric definitions, and evaluation methodology versions. Ensures reproducibility and enables comparison across iterations. Example: knowing that v2.0 uses a different toxicity classifier than v1.0.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Regulatory Landscape -->
+        <section class="section">
+            <h2 class="section-title">Regulatory Landscape</h2>
+            <div class="section-content">
+                <p>
+                    Multiple regulatory frameworks now mandate or strongly recommend evaluation governance. Organizations must understand obligations in their operating jurisdictions:
+                </p>
+            </div>
+            <div class="regulatory-grid">
+                <div class="regulatory-item">
+                    <div class="regulatory-name">EU AI Act</div>
+                    <div class="regulatory-description">Risk-based classification of AI systems. High-risk systems (law enforcement, credit decisions, hiring) require mandatory evaluation, documentation, and human oversight. Non-compliance results in fines up to 6% of annual revenue.</div>
+                </div>
+
+                <div class="regulatory-item">
+                    <div class="regulatory-name">NIST AI RMF</div>
+                    <div class="regulatory-description">AI Risk Management Framework establishing evaluation and monitoring requirements across model lifecycle. Emphasizes risk identification, measurement, and mitigation. Used by U.S. federal agencies and increasingly adopted by enterprise organizations.</div>
+                </div>
+
+                <div class="regulatory-item">
+                    <div class="regulatory-name">Executive Order on AI Safety</div>
+                    <div class="regulatory-description">U.S. federal guidance on AI safety evaluation standards. Requires agencies deploying AI to conduct documented safety testing. Establishes baseline expectations that may influence private sector practices.</div>
+                </div>
+
+                <div class="regulatory-item">
+                    <div class="regulatory-name">ISO/IEC 42001</div>
+                    <div class="regulatory-description">International AI management system standard. Defines governance structures, risk management, and evaluation processes. Increasingly required by organizations subject to ISO compliance mandates.</div>
+                </div>
+
+                <div class="regulatory-item">
+                    <div class="regulatory-name">FDA (Healthcare AI)</div>
+                    <div class="regulatory-description">Medical Device Regulations apply to AI/ML systems used in healthcare. Requires validation studies demonstrating safety and effectiveness. Documentation of evaluation methodology and results is mandatory for approval.</div>
+                </div>
+
+                <div class="regulatory-item">
+                    <div class="regulatory-name">SEC & FINRA (Financial AI)</div>
+                    <div class="regulatory-description">Financial regulators require documented testing of AI systems used in trading, lending, and advisory. Governance must include backtesting, stress testing, and clear authorization chains before deployment.</div>
+                </div>
+
+                <div class="regulatory-item">
+                    <div class="regulatory-name">EEOC (Hiring AI)</div>
+                    <div class="regulatory-description">Equal Employment Opportunity Commission scrutinizes AI used in recruitment and hiring. Requires validation that systems don't discriminate and documented bias evaluation. Failure to evaluate and document is potential legal liability.</div>
+                </div>
+
+                <div class="regulatory-item">
+                    <div class="regulatory-name">Industry-Specific Standards</div>
+                    <div class="regulatory-description">Sectors like telecommunications, energy, and transportation often have sector-specific AI governance requirements. Organizations must identify applicable standards in their industry.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Building a Governance Framework -->
+        <section class="section">
+            <h2 class="section-title">Building a Governance Framework</h2>
+            <div class="section-content">
+                <p>
+                    Implementing governance doesn't require bureaucratic overhead. Start small and iterate. Here's a practical approach:
+                </p>
+            </div>
+            <div class="steps-list">
+                <div class="step-item">
+                    <div class="step-title">1. Define Evaluation Taxonomy</div>
+                    <div class="step-description">
+                        Document: What dimensions must be evaluated (accuracy, safety, bias, speed)? For each dimension, what metrics matter? When must evaluation occur (before training, during fine-tuning, before deployment, post-launch)? How often must metrics be re-checked? Start with high-risk systems and expand.
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-title">2. Create Model Evaluation Scorecards</div>
+                    <div class="step-description">
+                        Design standardized templates for documenting evaluation results. Scorecards should include: model name and version, training data description, evaluation datasets used, metrics and results, known limitations, recommended use cases, and sign-off by evaluators. Make templates available to all teams.
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-title">3. Implement Automated Evaluation in CI/CD</div>
+                    <div class="step-description">
+                        Integrate key evaluation metrics into continuous integration pipelines. When models are trained or updated, automatically run safety, accuracy, and fairness evaluations. Flag regressions before they reach code review. Reduces manual burden and ensures consistency.
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-title">4. Establish Review Boards for High-Risk Deployments</div>
+                    <div class="step-description">
+                        Create lightweight review processes for high-risk models (healthcare, finance, hiring). Board should include: product owner, ML engineer, domain expert, and compliance representative. Board reviews evaluation results, scorecard, and makes go/no-go decision. Document all discussions and decisions.
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-title">5. Document Everything Systematically</div>
+                    <div class="step-description">
+                        Create a central registry of all models, evaluation results, and deployment decisions. For each model: store training datasets, evaluation datasets, prompts used, metric definitions, raw results, and approval records. Use version control (Git for code, data versioning tools for datasets).
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-title">6. Conduct Regular Governance Audits</div>
+                    <div class="step-description">
+                        Quarterly or semi-annually, review your governance processes: Are evaluation standards being followed? Are audit trails complete? Are approval gates effective? Do teams understand their roles? Identify bottlenecks and iterate on processes. Governance should reduce friction, not create it.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Related Resources -->
+        <section class="section">
+            <h2 class="section-title">Related Resources</h2>
+            <div class="section-content">
+                <p>
+                    Explore other pillars and foundational concepts for comprehensive LLM evaluation:
+                </p>
+            </div>
+            <div class="resources-list">
+                <a href="index.html" class="resource-link">← Back to Framework</a>
+                <a href="index.html#production" class="resource-link">Production Section</a>
+                <a href="index.html#foundations" class="resource-link">Foundations (Why Evaluation Matters)</a>
+            </div>
+        </section>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark-mode');
+            localStorage.setItem('theme', html.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            html.classList.remove('dark-mode');
+        }
+
+        // Back to Top Button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

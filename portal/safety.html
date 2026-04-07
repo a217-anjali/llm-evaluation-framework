@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety in LLM Evaluation - LLM Eval Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sticky Navigation */
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--color-accent-dark);
+        }
+
+        .theme-toggle {
+            width: 48px;
+            height: 28px;
+            border-radius: 14px;
+            border: 2px solid var(--color-border);
+            background-color: var(--color-bg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--color-accent);
+        }
+
+        .toggle-circle {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background-color: var(--color-accent);
+            transition: transform 0.3s;
+        }
+
+        html.dark-mode .toggle-circle {
+            transform: translateX(20px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--color-text);
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--color-accent);
+            display: inline-block;
+        }
+
+        .section-content {
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+            line-height: 1.8;
+        }
+
+        .section-content p {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-content ul, .section-content ol {
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-content li {
+            margin-bottom: 0.8rem;
+        }
+
+        .section-content strong {
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .metric-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .metric-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-description {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .metric-subsection {
+            margin-bottom: 0.8rem;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-accent-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.3rem;
+        }
+
+        .metric-text {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Benchmarks Section */
+        .benchmarks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .benchmark-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: background-color 0.2s;
+        }
+
+        .benchmark-item:hover {
+            background-color: rgba(135, 206, 235, 0.1);
+        }
+
+        .benchmark-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .benchmark-description {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Tips Section */
+        .tips-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .tip-item {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            border-left: 4px solid var(--color-accent-light);
+        }
+
+        .tip-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .tip-description {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Resources Section */
+        .resources-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .resource-link {
+            display: inline-block;
+            padding: 0.75rem 1.25rem;
+            background-color: var(--color-bg-secondary);
+            color: var(--color-accent);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-accent);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-lg);
+            z-index: 50;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: translateY(-4px);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1.5rem;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+
+            .metrics-grid, .benchmarks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-bar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .nav-left, .nav-bar > div:last-child {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <div class="nav-left">
+            <a href="index.html" class="nav-link">← Back to Framework</a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <div class="toggle-circle"></div>
+        </button>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="title">Safety in LLM Evaluation</h1>
+            <p class="subtitle">Ensuring models behave responsibly and avoid harmful outputs</p>
+        </div>
+
+        <!-- Section 1: What is Safety? -->
+        <section class="section">
+            <h2 class="section-title">What is Safety?</h2>
+            <div class="section-content">
+                <p>
+                    Safety in the context of large language models refers to a model's ability to operate responsibly and avoid generating harmful, dangerous, or unethical outputs. Safety is not a binary property but rather a <strong>spectrum of behaviors</strong> that must be carefully balanced against utility and helpfulness.
+                </p>
+                <p>
+                    Key dimensions of LLM safety include:
+                </p>
+                <ul>
+                    <li><strong>Harm Prevention:</strong> Avoiding the generation of content that could cause physical, psychological, or social harm (violence, hate speech, harassment)</li>
+                    <li><strong>Toxicity Control:</strong> Minimizing the use of offensive, abusive, or derogatory language</li>
+                    <li><strong>Bias Mitigation:</strong> Preventing the amplification or perpetuation of societal biases against protected groups</li>
+                    <li><strong>Jailbreak Resilience:</strong> Resisting attempts to bypass safety guidelines through adversarial prompts</li>
+                    <li><strong>Misuse Prevention:</strong> Reducing dual-use potential where harmless capabilities are repurposed for harmful applications</li>
+                    <li><strong>Honesty & Groundedness:</strong> Avoiding hallucinated or fabricated information, especially in safety-critical domains</li>
+                </ul>
+                <p>
+                    Safety requires ongoing evaluation because emerging attack vectors, cultural shifts, and new application domains continuously challenge existing safety measures. The goal is not zero harm—an impossibility—but rather <strong>proportionate, context-aware risk management</strong>.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 2: Why Safety Matters -->
+        <section class="section">
+            <h2 class="section-title">Why Safety Matters</h2>
+            <div class="section-content">
+                <p>
+                    Deploying unsafe AI systems carries significant consequences across multiple dimensions:
+                </p>
+                <ul>
+                    <li><strong>Reputational Risk:</strong> High-profile AI safety failures generate negative media coverage and erode user trust. Notable examples include chatbots generating offensive content and assistants providing dangerous advice, resulting in public backlash and brand damage.</li>
+                    <li><strong>Legal & Regulatory Compliance:</strong> The EU AI Act classifies high-risk systems requiring safety documentation and testing. NIST's AI Risk Management Framework emphasizes safety assessment. Non-compliance can result in fines, restrictions, or market exclusion.</li>
+                    <li><strong>Direct User Harm:</strong> Unsafe models may produce misinformation, enable harassment, amplify biases against vulnerable populations, or provide harmful instructions (medical, chemical, psychological abuse guidance).</li>
+                    <li><strong>Institutional Liability:</strong> Organizations deploying unsafe systems face legal action from affected users, potential regulatory sanctions, and mandatory remediation costs.</li>
+                    <li><strong>Dual-Use Concerns:</strong> Systems designed for beneficial purposes can be repurposed for harmful applications—writing assistance becomes propaganda, code generation enables malware creation, information retrieval facilitates misinformation campaigns.</li>
+                    <li><strong>Societal Impact:</strong> At scale, safety failures contribute to erosion of information integrity, increased polarization, and diminished trust in institutions.</li>
+                </ul>
+                <p>
+                    Safety evaluation is not a compliance checkbox but a <strong>fundamental responsibility</strong> for any organization deploying LLMs in real-world applications.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 3: Key Metrics -->
+        <section class="section">
+            <h2 class="section-title">Key Safety Metrics</h2>
+            <div class="section-content">
+                <p>
+                    These metrics help quantify different dimensions of LLM safety. Each captures a specific aspect of responsible behavior:
+                </p>
+            </div>
+            <div class="metrics-grid">
+                <!-- Toxicity Score -->
+                <div class="metric-card">
+                    <div class="metric-title">Toxicity Score</div>
+                    <div class="metric-description">
+                        Probability that model outputs contain offensive, abusive, or hateful language. Ranges from 0 (non-toxic) to 1 (highly toxic).
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">When to Use</div>
+                        <div class="metric-text">Conversational models, chatbots, content generation systems where language tone matters directly to users.</div>
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">Key Pitfalls</div>
+                        <div class="metric-text">Classifiers may flag legitimate academic discussion of harmful content; cultural context affects toxicity perception.</div>
+                    </div>
+                </div>
+
+                <!-- Attack Success Rate -->
+                <div class="metric-card">
+                    <div class="metric-title">Attack Success Rate (ASR)</div>
+                    <div class="metric-description">
+                        Percentage of adversarial prompts that successfully bypass safety guidelines or elicit harmful responses from the model.
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">When to Use</div>
+                        <div class="metric-text">Red-teaming exercises, vulnerability assessment, comparing robustness across model versions or competitors.</div>
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">Key Pitfalls</div>
+                        <div class="metric-text">Requires careful definition of "success" (does mild spillover count?); attack sophistication varies widely.</div>
+                    </div>
+                </div>
+
+                <!-- Refusal Rate -->
+                <div class="metric-card">
+                    <div class="metric-title">Refusal Rate</div>
+                    <div class="metric-description">
+                        Percentage of requests the model appropriately refuses (genuine safety violations). Must be balanced against over-refusal rate to avoid helplessness.
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">When to Use</div>
+                        <div class="metric-text">Measuring policy enforcement, diagnosing safety mechanism effectiveness, monitoring safety drift post-deployment.</div>
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">Key Pitfalls</div>
+                        <div class="metric-text">High refusal alone is not good—excessive refusals on harmless requests damage user satisfaction and utility.</div>
+                    </div>
+                </div>
+
+                <!-- Bias Score -->
+                <div class="metric-card">
+                    <div class="metric-title">Bias Score</div>
+                    <div class="metric-description">
+                        Measures differential performance or representation across demographic groups (gender, race, religion, age). Includes both representation and stereotype bias.
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">When to Use</div>
+                        <div class="metric-text">Evaluating fairness, high-stakes applications (hiring, lending), public-facing systems with diverse user bases.</div>
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">Key Pitfalls</div>
+                        <div class="metric-text">Defining protected groups and fairness criteria is context-dependent; multiple fairness definitions can conflict.</div>
+                    </div>
+                </div>
+
+                <!-- Faithfulness / Groundedness -->
+                <div class="metric-card">
+                    <div class="metric-title">Faithfulness / Groundedness</div>
+                    <div class="metric-description">
+                        Measures whether outputs accurately reflect provided information or training data rather than hallucinating false claims, especially critical for safety-sensitive domains.
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">When to Use</div>
+                        <div class="metric-text">Medical, legal, financial advice systems; any application where false information creates user harm.</div>
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">Key Pitfalls</div>
+                        <div class="metric-text">Hard to automate; requires human evaluation; borderline cases (minor elaborations vs. hallucinations) are ambiguous.</div>
+                    </div>
+                </div>
+
+                <!-- Red-Team Pass Rate -->
+                <div class="metric-card">
+                    <div class="metric-title">Red-Team Pass Rate</div>
+                    <div class="metric-description">
+                        Percentage of adversarial red-team scenarios the model handles safely without producing harmful outputs. Inverse of ASR but captures broader safety scenarios.
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">When to Use</div>
+                        <div class="metric-text">Comprehensive safety assessment before deployment, comparative evaluations, documenting safety improvements.</div>
+                    </div>
+                    <div class="metric-subsection">
+                        <div class="metric-label">Key Pitfalls</div>
+                        <div class="metric-text">Red-team quality varies; results don't generalize to unforeseen attack vectors; expensive and time-consuming.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Benchmarks for Safety -->
+        <section class="section">
+            <h2 class="section-title">Benchmarks for Safety</h2>
+            <div class="section-content">
+                <p>
+                    Standardized benchmarks enable reproducible, comparable safety evaluation across models and organizations:
+                </p>
+            </div>
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <div class="benchmark-name">HarmBench</div>
+                    <div class="benchmark-description">Comprehensive harm taxonomy with 400+ test cases covering illegal activities, violence, malware, discrimination, manipulation, NSFW content, and privacy violations. Enables category-specific analysis.</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <div class="benchmark-name">ToxiGen</div>
+                    <div class="benchmark-description">Large-scale implicit toxicity dataset focusing on toxic implicit attitudes and offensive language generation. Targets subtle bias rather than obvious slurs.</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <div class="benchmark-name">BBQ (Bias Benchmark for QA)</div>
+                    <div class="benchmark-description">Evaluates social bias in question-answering across 9 demographic dimensions. Measures whether models exhibit stereotypical associations with groups.</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <div class="benchmark-name">RealToxicityPrompts</div>
+                    <div class="benchmark-description">~100k naturally-occurring prompts from the web, classified for toxicity. Tests model behavior on realistic (not synthetic) prompts that may elicit harmful completions.</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <div class="benchmark-name">WildGuard</div>
+                    <div class="benchmark-description">Dataset of real user prompts and model responses for safety classification. Captures authentic user behavior and failure modes observed in production.</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <div class="benchmark-name">SafetyBench</div>
+                    <div class="benchmark-description">Multilingual safety benchmark covering diverse harm categories and adversarial attack patterns. Enables safety evaluation across language boundaries.</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <div class="benchmark-name">XSTest</div>
+                    <div class="benchmark-description">Tests for exaggerated safety refusals on benign requests. Diagnoses over-refusal and helps balance safety with helpfulness.</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <div class="benchmark-name">BOLD (Bias in Open-ended Language Generation)</div>
+                    <div class="benchmark-description">Evaluates model bias in open-ended generation across occupations, gender, race, and religion. Measures stereotype perpetuation in freeform outputs.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Practical Tips -->
+        <section class="section">
+            <h2 class="section-title">Practical Tips for Safety Evaluation</h2>
+            <div class="tips-list">
+                <div class="tip-item">
+                    <div class="tip-title">1. Implement Layered Defense</div>
+                    <div class="tip-description">
+                        Don't rely on the model alone. Combine input pre-processing (content filtering), model-level guardrails (prompt engineering, fine-tuning), and output post-processing (safety classifiers). This "defense in depth" approach catches failure modes at multiple stages.
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-title">2. Conduct Regular Red-Teaming</div>
+                    <div class="tip-description">
+                        Engage diverse teams (internal, external, domain experts) to actively try to break safety measures. Use both manual attacks and automated adversarial attack tools. Iterate and close discovered gaps before deployment.
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-title">3. Monitor for Safety Regressions</div>
+                    <div class="tip-description">
+                        After model updates, rerun safety benchmarks to detect regressions. Safety improvements in one area may inadvertently weaken others. Establish baseline metrics and alert thresholds for production systems.
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-title">4. Balance Safety with Helpfulness</div>
+                    <div class="tip-description">
+                        Excessive refusals frustrate users and reduce utility. Define clear harm thresholds rather than banning entire topics. A model that refuses all requests about chemistry is safer but useless; allow legitimate educational chemistry questions.
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-title">5. Establish Clear Safety Taxonomy</div>
+                    <div class="tip-description">
+                        Define your organization's harm categories and severity levels explicitly. Document what constitutes prohibited content, edge cases, and escalation procedures. Consistency in evaluation depends on clear definitions.
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-title">6. Test Across Contexts and Languages</div>
+                    <div class="tip-description">
+                        Safety concerns vary by language (slurs, cultural taboos) and context (medical vs. casual conversations). Evaluate on multilingual benchmarks and in domain-specific use cases, not just English general-purpose datasets.
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-title">7. Document Failure Modes</div>
+                    <div class="tip-description">
+                        When safety issues are discovered, document them thoroughly with reproduction steps and severity. Share learnings across teams and externally (industry vulnerability databases) to advance collective safety practices.
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-title">8. Involve Domain Experts</div>
+                    <div class="tip-description">
+                        Safety is context-sensitive. For healthcare, legal, or finance applications, involve domain experts to define acceptable behavior. Automated metrics miss nuanced failures that domain experts would immediately recognize.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Related Resources -->
+        <section class="section">
+            <h2 class="section-title">Related Resources</h2>
+            <div class="section-content">
+                <p>
+                    Explore other pillars and deepen your understanding of LLM evaluation:
+                </p>
+            </div>
+            <div class="resources-list">
+                <a href="index.html" class="resource-link">← Back to Framework</a>
+                <a href="index.html#production" class="resource-link">Production Section</a>
+                <a href="index.html#foundations" class="resource-link">Foundations Pillar</a>
+            </div>
+        </section>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark-mode');
+            localStorage.setItem('theme', html.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            html.classList.remove('dark-mode');
+        }
+
+        // Back to Top Button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

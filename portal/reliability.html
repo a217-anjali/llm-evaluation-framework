@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reliability in LLM Evaluation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: background-color 0.3s ease;
+        }
+
+        nav a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            color: var(--color-accent);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header Section */
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.8rem;
+            background-color: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .metric-card h3 {
+            margin-top: 0;
+            color: var(--color-accent);
+            font-size: 1.2rem;
+        }
+
+        .metric-card .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .metric-card .description {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Challenges */
+        .challenges-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .challenge-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .challenge-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .challenge-item strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .challenge-item p {
+            margin-bottom: 0;
+        }
+
+        /* Tips Section */
+        .tips-list {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tips-list li {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .resource-link {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-link strong {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-link-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.1);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--color-accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.95rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .challenges-list {
+                grid-template-columns: 1fr;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">← Back to Framework</a>
+        <div class="nav-right">
+            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>Reliability in LLM Evaluation</h1>
+            <p class="subtitle">Ensuring consistent, reproducible, and dependable model behavior</p>
+        </header>
+
+        <!-- Section 1: What is Reliability? -->
+        <section id="what-is-reliability">
+            <h2>What is Reliability?</h2>
+            <p>Reliability in LLM evaluation measures the consistency and reproducibility of model outputs and evaluation results. It answers fundamental questions:</p>
+            <ul>
+                <li><strong>Consistency Across Runs:</strong> Does the model produce the same answer when asked the same question multiple times (at temperature=0)?</li>
+                <li><strong>Reproducibility of Evaluations:</strong> Can evaluation results be replicated across different environments, timestamps, and evaluators?</li>
+                <li><strong>Stability Under Perturbation:</strong> How sensitive is the model to small changes in wording, formatting, or context placement?</li>
+                <li><strong>Predictable Behavior:</strong> Not just "does it work?" but "does it work every time, under expected conditions?"</li>
+            </ul>
+            <p>Reliability is distinct from accuracy. A model can be consistently wrong (high reliability, low accuracy) or inconsistently right (low reliability, potentially high accuracy). Both are problematic in production. True reliability requires both consistency AND correctness.</p>
+        </section>
+
+        <!-- Section 2: Why Reliability Matters -->
+        <section id="why-reliability-matters">
+            <h2>Why Reliability Matters</h2>
+            <h3>Production SLAs & Operations</h3>
+            <p>Service level agreements depend on consistent behavior. If a model's accuracy varies wildly between runs or conditions, it's impossible to guarantee uptime or performance commitments to users.</p>
+            <h3>Non-Deterministic Outputs Complicate Debugging</h3>
+            <p>When outputs differ across runs, it becomes extremely difficult to diagnose why a system failed. Is it the model, the prompt, the infrastructure, or randomness? Unreliable systems are a debugging nightmare.</p>
+            <h3>Prompt Sensitivity Makes Evaluations Fragile</h3>
+            <p>Evaluations depend on specific prompts and formats. If small wording changes produce different answers, your evaluation results may not generalize to real-world usage where users phrase things differently.</p>
+            <h3>Silent Model Degradation</h3>
+            <p>Without baseline reliability metrics, you may not notice when model updates silently degrade behavior. A new version might perform better on one metric but become less reliable overall.</p>
+            <h3>User Trust & Perceived Quality</h3>
+            <p>Users lose confidence in systems that behave unpredictably, even if accuracy is high on average. Inconsistency is experienced as a quality problem, regardless of mean performance metrics.</p>
+        </section>
+
+        <!-- Section 3: Key Metrics -->
+        <section id="key-metrics">
+            <h2>Key Metrics</h2>
+            <p>Each metric captures a different dimension of reliability. Combine them to understand your system's overall dependability:</p>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Consistency Rate</h3>
+                    <p>Percentage of queries that produce identical answers across repeated runs at temperature=0.</p>
+                    <div class="label">Measurement Method</div>
+                    <div class="value">Run each prompt n times (n≥3). Count exact matches. Rate = (# identical outputs) / (# unique outputs)</div>
+                    <div class="label">What It Means</div>
+                    <div class="description">High consistency (95%+) means you can rely on deterministic behavior for production. Low consistency (below 80%) suggests the model or inference pipeline has sources of non-determinism.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Prompt Sensitivity</h3>
+                    <p>Output variance when the same question is rephrased in different ways (semantically equivalent but linguistically different).</p>
+                    <div class="label">Measurement Method</div>
+                    <div class="value">Create 5-10 paraphrases of each prompt. Measure: (# consistent answers across paraphrases) / (# total paraphrases)</div>
+                    <div class="label">What It Means</div>
+                    <div class="description">High sensitivity (below 70%) indicates your evaluations may not generalize. Users might phrase the same question differently and get different answers.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Calibration (ECE)</h3>
+                    <p>Expected Calibration Error: how well model confidence matches actual accuracy.</p>
+                    <div class="label">Measurement Method</div>
+                    <div class="value">Bin predictions by confidence. ECE = Σ(|accuracy - confidence| × bin_fraction)</div>
+                    <div class="label">What It Means</div>
+                    <div class="description">Well-calibrated models (ECE below 0.05) reliably signal when they're unsure. Poorly calibrated models are confidently wrong, undermining user trust.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Inter-Annotator Agreement</h3>
+                    <p>Agreement between human raters when evaluating the same outputs (Cohen's Kappa or Krippendorff's Alpha).</p>
+                    <div class="label">Measurement Method</div>
+                    <div class="value">Have 2-3 independent evaluators score ~10% of outputs. Cohen's Kappa = (P_o - P_e) / (1 - P_e)</div>
+                    <div class="label">What It Means</div>
+                    <div class="description">Kappa below 0.6 indicates low evaluation reliability. Your metrics themselves are unreliable if evaluators disagree significantly.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Reproducibility Score</h3>
+                    <p>Can evaluation results be replicated across different environments (hardware, API versions, inference frameworks)?</p>
+                    <div class="label">Measurement Method</div>
+                    <div class="value">Run same evaluation suite in 2-3 different environments. Reproducibility = (# metrics within 2% difference) / (# total metrics)</div>
+                    <div class="label">What It Means</div>
+                    <div class="description">Below 95% reproducibility means your evaluation framework depends too heavily on specific environments. Your metrics won't generalize across deployment contexts.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Uptime / Availability</h3>
+                    <p>For hosted models/APIs, the percentage of time the service is operational and returning valid responses.</p>
+                    <div class="label">Measurement Method</div>
+                    <div class="value">Monitor successful API calls. Uptime = (# successful responses) / (# total requests) over measurement period</div>
+                    <div class="label">What It Means</div>
+                    <div class="description">Production-grade services aim for 99.5%+ uptime (SLA). Below 99% means service disruptions are frequent enough to be a reliability concern.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Reliability Challenges -->
+        <section id="challenges">
+            <h2>Reliability Challenges</h2>
+            <p>Common sources of unreliability in LLM evaluation:</p>
+
+            <div class="challenges-list">
+                <div class="challenge-item">
+                    <strong>Non-Determinism Despite temperature=0</strong>
+                    <p>Even with fixed hyperparameters, floating-point arithmetic differences across hardware/frameworks can produce different token probabilities, affecting sampling behavior.</p>
+                </div>
+                <div class="challenge-item">
+                    <strong>Prompt Sensitivity</strong>
+                    <p>Small changes in wording ("What is..." vs "Tell me about...") produce different outputs. This makes evaluations sensitive to phrasing choices and fragile to natural language variation.</p>
+                </div>
+                <div class="challenge-item">
+                    <strong>Context Window Position Effects</strong>
+                    <p>Models often pay disproportionate attention to information at the start or end of the context. Position of information in multi-document RAG systems affects reliability.</p>
+                </div>
+                <div class="challenge-item">
+                    <strong>Silent Model Versioning</strong>
+                    <p>API providers silently update model versions. Behavior can change without warning, making baseline comparisons and A/B tests invalid if versions diverge mid-evaluation.</p>
+                </div>
+                <div class="challenge-item">
+                    <strong>Evaluation Flakiness</strong>
+                    <p>Metrics themselves can vary between runs (e.g., embedding-based metrics depend on model state). "Passes 95% of the time" is not reliable enough for production systems.</p>
+                </div>
+                <div class="challenge-item">
+                    <strong>Temporal Dependencies</strong>
+                    <p>Sequential API calls share state. Failure in one call can cascade. Evaluation results from different times of day may differ due to load variation or model updates.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Building Reliable Evaluations -->
+        <section id="building-reliable">
+            <h2>Building Reliable Evaluations</h2>
+
+            <div class="tips-list">
+                <ul>
+                    <li><strong>Pin Model Versions and API Endpoints:</strong> Hardcode model versions, API endpoints, and inference framework versions. Don't rely on "latest." Document exactly what versions were used in all evaluation reports.</li>
+
+                    <li><strong>Use Statistical Significance Tests:</strong> Never compare models based on single-run metric differences. A 91% vs 92% difference might be noise. Use t-tests, bootstrap confidence intervals, or permutation tests to establish significance.</li>
+
+                    <li><strong>Report Confidence Intervals, Not Point Estimates:</strong> Instead of "Model A is 89% accurate," report "89% ± 2.1% (95% CI)." Confidence intervals capture measurement uncertainty and make comparisons more honest.</li>
+
+                    <li><strong>Run Evaluations Multiple Times and Aggregate:</strong> Evaluate the same model multiple times (minimum 3 runs, better with 5-10) and report mean and standard deviation. This reveals variance you'd otherwise miss.</li>
+
+                    <li><strong>Use Block Bootstrap for Temporal Dependence:</strong> If evaluation data has temporal structure or dependencies, use block bootstrap (resampling contiguous blocks rather than random samples) to maintain dependencies and get realistic confidence intervals.</li>
+
+                    <li><strong>Document Evaluation Environment Completely:</strong> Record hardware specs, OS, Python version, library versions, random seeds, API endpoints, and timestamps. Future you (or reviewers) will need this to understand and reproduce results.</li>
+
+                    <li><strong>Monitor for Prompt Sensitivity:</strong> Evaluate on multiple prompt variants for the same task. If metric variance due to rephrasing is high (>15%), your evaluation is too prompt-dependent and won't generalize.</li>
+
+                    <li><strong>Test Reproducibility Explicitly:</strong> Re-run your entire evaluation suite on different hardware/environments at least once. Document any differences. If differences exceed your acceptable tolerance, investigate the cause.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 6: Related Resources -->
+        <section id="resources">
+            <h2>Related Resources</h2>
+
+            <div class="resources-grid">
+                <a href="index.html" class="resource-link">
+                    <strong>← Framework Overview</strong>
+                    <p>Return to the main LLM Evaluation Framework</p>
+                    <span class="resource-link-label">Core</span>
+                </a>
+
+                <a href="index.html#statistical-rigor" class="resource-link">
+                    <strong>Statistical Rigor</strong>
+                    <p>In-depth guide to statistical significance testing and confidence intervals</p>
+                    <span class="resource-link-label">Technical</span>
+                </a>
+
+                <a href="index.html#production" class="resource-link">
+                    <strong>Production Deployment</strong>
+                    <p>How to maintain reliability in live systems and monitor for degradation</p>
+                    <span class="resource-link-label">Reference</span>
+                </a>
+
+                <a href="index.html#foundations" class="resource-link">
+                    <strong>Foundations</strong>
+                    <p>Core principles of evaluation methodology and measurement theory</p>
+                    <span class="resource-link-label">Foundations</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Other Pillars</strong>
+                    <p>Explore related pillars: Accuracy, Safety, Speed, Cost</p>
+                    <span class="resource-link-label">Explore</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <p>LLM Evaluation Framework | Reliability Pillar</p>
+        <p>Part of the comprehensive guide to evaluating large language models. <a href="index.html">Learn more</a></p>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark-mode');
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeToggleIcon();
+        });
+
+        function updateThemeToggleIcon() {
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Load theme preference
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            htmlElement.classList.remove('dark-mode');
+        }
+        updateThemeToggleIcon();
+
+        // Back to top button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

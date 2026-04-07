@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed in LLM Evaluation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: background-color 0.3s ease;
+        }
+
+        nav a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            color: var(--color-accent);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header Section */
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.8rem;
+            background-color: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .metric-card h3 {
+            margin-top: 0;
+            color: var(--color-accent);
+            font-size: 1.2rem;
+        }
+
+        .metric-card .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .metric-card .when-to-use,
+        .metric-card .pitfalls {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-card .when-to-use {
+            color: var(--color-accent-light);
+        }
+
+        .metric-card .pitfalls {
+            color: #ff9999;
+        }
+
+        /* Benchmarks */
+        .benchmarks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .benchmark-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .benchmark-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .benchmark-item strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .benchmark-item p {
+            margin-bottom: 0;
+        }
+
+        /* Tips Section */
+        .tips-list {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tips-list li {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .resource-link {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-link strong {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-link-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.1);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--color-accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.95rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .benchmarks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">← Back to Framework</a>
+        <div class="nav-right">
+            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>Speed in LLM Evaluation</h1>
+            <p class="subtitle">Measuring and optimizing latency, throughput, and time-to-result</p>
+        </header>
+
+        <!-- Section 1: What is Speed? -->
+        <section id="what-is-speed">
+            <h2>What is Speed?</h2>
+            <p>Speed in LLM evaluation encompasses two interconnected dimensions that drive production deployment decisions:</p>
+            <ul>
+                <li><strong>Model Inference Speed:</strong> How fast a model generates tokens. Measured in latency (milliseconds to first token, total request time), throughput (tokens generated per second), and percentile response times (P50, P95, P99). Determines user experience and real-time capability.</li>
+                <li><strong>Evaluation Pipeline Speed:</strong> How quickly you can run complete benchmarks and get results. Evaluation that takes 48 hours becomes a bottleneck for iteration. Fast evaluation enables rapid experimentation and model improvement cycles.</li>
+            </ul>
+            <p>Both dimensions matter. A model that generates tokens in 100ms but takes 2 weeks to evaluate is inefficient for development. Conversely, a model that evaluates instantly but produces responses in 5 seconds creates poor user experience. Speed evaluation requires measuring both.</p>
+        </section>
+
+        <!-- Section 2: Why Speed Matters -->
+        <section id="why-speed-matters">
+            <h2>Why Speed Matters</h2>
+            <ul>
+                <li><strong>User Experience:</strong> Response latency budgets exist in production. Chatbots must respond in under 2 seconds for acceptable UX. Code completion in IDEs must respond in under 500ms. Speed directly determines whether users perceive the system as responsive or sluggish.</li>
+                <li><strong>Real-Time Applications:</strong> Certain applications require low latency to be viable. Live transcription, real-time translation, code completion, and interactive tutoring systems cannot function with slow models. Speed isn't optional—it's a requirement.</li>
+                <li><strong>Evaluation Iteration Velocity:</strong> Development organizations measure iteration speed in weeks or days. A full evaluation suite that takes 48 hours becomes a bottleneck. Faster evaluation enables more experiments, faster feedback loops, and quicker model improvement cycles. Speed here is multiplied across your entire research team.</li>
+                <li><strong>Cost Implications:</strong> Slower models require more compute to serve. A model generating 50 tokens/second needs 2x the infrastructure of a 100 token/second model to serve the same throughput. Speed improvements directly reduce infrastructure costs at scale.</li>
+                <li><strong>Competitive Advantage:</strong> In deployed systems, speed becomes a feature. Users choose faster tools. First-mover advantage often goes to the system that's both accurate AND fast.</li>
+            </ul>
+        </section>
+
+        <!-- Section 3: Key Metrics -->
+        <section id="key-metrics">
+            <h2>Key Metrics</h2>
+            <p>Speed evaluation requires multiple metrics across the inference and evaluation dimensions:</p>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Time to First Token (TTFT)</h3>
+                    <p>Latency from when a request is submitted to when the model returns the first token of the response.</p>
+                    <div class="label">Example</div>
+                    <div class="value">250ms on consumer hardware, 50ms on optimized inference servers</div>
+                    <div class="when-to-use">Perceived responsiveness. Users feel 500ms+ TTFT as slow. Critical for interactive applications (chat, code completion).</div>
+                    <div class="pitfalls">TTFT alone doesn't reflect full latency. A model with 50ms TTFT but 10 seconds end-to-end latency is still slow.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Tokens per Second (TPS)</h3>
+                    <p>Generation throughput: how many tokens the model produces per second of wall-clock time.</p>
+                    <div class="label">Example</div>
+                    <div class="value">100 TPS on A100 GPU, 10 TPS on CPU, 5 TPS on edge devices</div>
+                    <div class="when-to-use">Understanding generation speed and compute requirements. Used to estimate request-to-response time for different response lengths.</div>
+                    <div class="pitfalls">TPS varies with batch size, sequence length, and hardware. Needs to be measured under realistic conditions.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>End-to-End Latency</h3>
+                    <p>Total time from request submission to complete response delivery, including all overhead (tokenization, routing, post-processing).</p>
+                    <div class="label">Example</div>
+                    <div class="value">2000ms for a 500-token response on inference API</div>
+                    <div class="when-to-use">Real-world performance metric. What users and applications actually measure. Most important for production systems.</div>
+                    <div class="pitfalls">Varies significantly with request complexity, response length, and system load. Measure under production-like conditions.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>P50/P95/P99 Latency</h3>
+                    <p>Percentile-based latency distributions. P50 is median, P95 is 95th percentile, P99 is 99th percentile.</p>
+                    <div class="label">Example</div>
+                    <div class="value">P50: 1500ms, P95: 3000ms, P99: 5500ms</div>
+                    <div class="when-to-use">Understanding tail latency and SLO requirements. P99 is often the constraint for production systems ("99% of requests must complete in 3 seconds").</div>
+                    <div class="pitfalls">Easy to miss if only reporting mean latency. A system with mean 1s but P99 10s violates most SLOs despite good average performance.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Throughput (Requests per Second)</h3>
+                    <p>How many concurrent requests a system can handle per second under realistic load.</p>
+                    <div class="label">Example</div>
+                    <div class="value">100 RPS on batched inference, 10 RPS on single-request setup</div>
+                    <div class="when-to-use">System capacity planning. Determines infrastructure cost and user concurrency support.</div>
+                    <div class="pitfalls">Depends heavily on batching strategy. Unbatched serving often shows 1-10 RPS; batched can reach 100s. Not comparable across different serving strategies.</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Evaluation Pipeline Time</h3>
+                    <p>Wall-clock time to run complete benchmark suite: generate predictions, score them, and produce final results.</p>
+                    <div class="label">Example</div>
+                    <div class="value">12 hours for full MMLU-Pro on single GPU, 2 hours on 6-GPU cluster</div>
+                    <div class="when-to-use">Development iteration speed. Direct enabler of research velocity. Every hour saved multiplies across team experiments.</div>
+                    <div class="pitfalls">Parallelization can hide true per-model latency. Report both single-instance and parallelized times.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Speed Benchmarks -->
+        <section id="benchmarks">
+            <h2>Speed Benchmarks</h2>
+            <p>Understanding speed requires context. How does a model compare against standard baselines and other models in its class?</p>
+
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>Chatbot Arena Latency Rankings</strong>
+                    <p>Community-powered rankings of model latency in real chat scenarios. Shows wall-clock response time under live serving conditions. Essential real-world reference for deployment planning.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>Artificial Analysis Speed Index</strong>
+                    <p>Comprehensive speed benchmarks across major models. Measures inference speed (tokens/second) on standardized hardware. Allows apples-to-apples model comparison.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>LMSYS Throughput Comparisons</strong>
+                    <p>Measures throughput (requests per second) for different models and batch configurations. Shows scaling behavior and batching impact. Critical for understanding production serving.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>Model Size vs. Speed Tradeoff</strong>
+                    <p>Typical patterns: 7B models (30-50 TPS on single GPU), 13B models (15-25 TPS), 70B models (3-7 TPS), 400B+ models (1-3 TPS). Quantization can improve speed 2-4x at accuracy cost.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>Quantization Impact</strong>
+                    <p>FP16 (baseline): 1x speed. INT8: 1.5-2x faster. INT4: 2-4x faster. GGUF quantization: 1.5-3x faster on CPU. Speed gains come with accuracy loss—requires evaluation on your benchmarks.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>Hardware-Specific Benchmarks</strong>
+                    <p>Same model varies dramatically across hardware. A7 GPU, L40S, RTX 4090, M3 Max, TPU—all have different speed profiles. Benchmark on your target hardware.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Optimization Strategies -->
+        <section id="optimization">
+            <h2>Optimization Strategies</h2>
+            <p>Speed can be improved across multiple dimensions. Each has tradeoffs:</p>
+
+            <h3>Model Quantization</h3>
+            <ul>
+                <li><strong>GPTQ (Gradient Quantized):</strong> Mixed-bit quantization (INT4-INT8). Can be 4x faster with minimal accuracy loss. Requires calibration on sample data. Best for deployment.</li>
+                <li><strong>AWQ (Activation-Aware Quantization):</strong> Similar to GPTQ but preserves critical activations. Often better accuracy-speed tradeoff. Newer, less hardware support.</li>
+                <li><strong>GGUF (GPT-Generated Unified Format):</strong> CPU-optimized quantization. Enables inference on consumer hardware. 1-3x speedup but lower absolute speed than GPU inference.</li>
+                <li><strong>Accuracy Tradeoff:</strong> INT4 quantization typically costs 1-3% accuracy. Benchmark before deploying. Some models are more sensitive than others.</li>
+            </ul>
+
+            <h3>Speculative Decoding</h3>
+            <ul>
+                <li>Use fast, small model to draft tokens. Large model verifies in batches. Can achieve 1.5-3x speedup without accuracy loss. Requires two models, adds complexity.</li>
+                <li>Most effective when small model is very fast and draft length is high (10-20 tokens). Works well for text generation, less for reasoning tasks.</li>
+            </ul>
+
+            <h3>KV-Cache Optimization</h3>
+            <ul>
+                <li>KV-cache stores key-value tensors for all previous tokens. Becomes bottleneck for long sequences. Optimization strategies: KV-cache quantization (int8/int4), selective attention (drop low-importance cache), hierarchical cache.</li>
+                <li>Can improve speed 1.5-2x for long context. Critical for real-world applications where context grows (chat history, documents).</li>
+            </ul>
+
+            <h3>Batching Strategies</h3>
+            <ul>
+                <li><strong>Static Batching:</strong> Wait for fixed batch size before processing. Simple, predictable, but high latency (waiting for batch to fill).</li>
+                <li><strong>Dynamic/Continuous Batching:</strong> Process requests as they arrive, batch dynamically. Better latency and throughput trade-off. Standard in production systems.</li>
+                <li><strong>Token-Level Batching:</strong> Interleave requests at token level. Maximum efficiency but complex implementation. Used in state-of-art inference servers.</li>
+            </ul>
+
+            <h3>Parallel Evaluation</h3>
+            <ul>
+                <li>Run inference on multiple GPUs/instances in parallel. Linear scaling if no I/O bottleneck. Can reduce 48-hour evaluation to 2-4 hours on 12+ GPU cluster.</li>
+                <li>Requires proper parallelization: split dataset, avoid duplicates, aggregate results correctly.</li>
+            </ul>
+
+            <h3>Streaming Evaluation Results</h3>
+            <ul>
+                <li>Start reporting partial results as they complete. Enables early stopping, hypothesis testing before full evaluation. Requires streaming infrastructure but saves time for iterative development.</li>
+            </ul>
+        </section>
+
+        <!-- Section 6: Speed-Accuracy Tradeoff -->
+        <section id="tradeoff">
+            <h2>Speed-Accuracy Tradeoff</h2>
+            <p>Speed improvements almost always come with accuracy costs. The key is finding the right balance for your use case:</p>
+            <ul>
+                <li><strong>Smaller Models:</strong> 7B model is 3-5x faster than 70B but typically 10-15% less accurate. Good for cost-sensitive or latency-critical applications.</li>
+                <li><strong>Quantization:</strong> INT4 quantization is 3-4x faster but costs 1-3% accuracy. Often worth it for deployment. INT8 is safer with minimal accuracy loss.</li>
+                <li><strong>Speculative Decoding:</strong> Minimal accuracy cost, pure speed gain. But requires two models and is more complex to implement.</li>
+                <li><strong>Context Reduction:</strong> Using less context is faster but may reduce accuracy. Requires testing on your task.</li>
+            </ul>
+            <p><strong>Pareto Frontier Concept:</strong> Not all speed-accuracy combinations are useful. A model that's both slower AND less accurate than another is dominated. Focus on the Pareto frontier—the set of models where you can't improve speed without losing accuracy (or vice versa). Your choice depends on your specific SLOs and requirements.</p>
+        </section>
+
+        <!-- Section 7: Related Resources -->
+        <section id="resources">
+            <h2>Related Resources</h2>
+
+            <div class="resources-grid">
+                <a href="index.html" class="resource-link">
+                    <strong>← Framework Overview</strong>
+                    <p>Return to the main LLM Evaluation Framework</p>
+                    <span class="resource-link-label">Core</span>
+                </a>
+
+                <a href="index.html#benchmarks" class="resource-link">
+                    <strong>Benchmarks Section</strong>
+                    <p>Complete list of evaluation benchmarks with speed references</p>
+                    <span class="resource-link-label">Reference</span>
+                </a>
+
+                <a href="index.html#tools" class="resource-link">
+                    <strong>Tools & Labs</strong>
+                    <p>Practical tools for measuring and optimizing inference speed</p>
+                    <span class="resource-link-label">Tools</span>
+                </a>
+
+                <a href="cost.html" class="resource-link">
+                    <strong>Cost Pillar</strong>
+                    <p>Speed and cost are deeply linked. Explore the tradeoff.</p>
+                    <span class="resource-link-label">Related</span>
+                </a>
+
+                <a href="accuracy.html" class="resource-link">
+                    <strong>Accuracy Pillar</strong>
+                    <p>Understanding accuracy-speed tradeoffs in practice</p>
+                    <span class="resource-link-label">Related</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Other Pillars</strong>
+                    <p>Explore other evaluation dimensions: Accuracy, Cost, Safety, and more</p>
+                    <span class="resource-link-label">Explore</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <p>LLM Evaluation Framework | Speed Pillar</p>
+        <p>Part of the comprehensive guide to evaluating large language models. <a href="index.html">Learn more</a></p>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark-mode');
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeToggleIcon();
+        });
+
+        function updateThemeToggleIcon() {
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Load theme preference
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            htmlElement.classList.remove('dark-mode');
+        }
+        updateThemeToggleIcon();
+
+        // Back to top button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>
