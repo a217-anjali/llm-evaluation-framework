@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluation Methods</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: background-color 0.3s ease;
+        }
+
+        nav a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            color: var(--color-accent);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header Section */
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.8rem;
+            background-color: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .metric-card h3 {
+            margin-top: 0;
+            color: var(--color-accent);
+            font-size: 1.2rem;
+        }
+
+        .metric-card .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .metric-card .when-to-use,
+        .metric-card .pitfalls {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-card .when-to-use {
+            color: var(--color-accent-light);
+        }
+
+        .metric-card .pitfalls {
+            color: #ff9999;
+        }
+
+        /* Benchmarks */
+        .benchmarks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .benchmark-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .benchmark-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .benchmark-item strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .benchmark-item p {
+            margin-bottom: 0;
+        }
+
+        /* Tips Section */
+        .tips-list {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tips-list li {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .resource-link {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-link strong {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-link-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.1);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--color-accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.95rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .benchmarks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">← Back to Framework</a>
+        <div class="nav-right">
+            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>Evaluation Methods</h1>
+            <p class="subtitle">From automated scoring to human judgment — choosing the right evaluation approach</p>
+        </header>
+
+        <!-- Section 1: Overview of Methods -->
+        <section id="overview">
+            <h2>Overview of Methods</h2>
+            <p>LLM evaluation requires multiple complementary approaches, each suited to different scenarios and constraints. The landscape includes automated metrics (fast, scalable, but imperfect), LLM-as-Judge systems (cost-effective alternatives to human review), human evaluation (gold standard but expensive), and specialized methods like pairwise comparison and contamination detection.</p>
+            <p>The choice of evaluation method depends on your development stage, available budget, time constraints, and the specific quality dimensions that matter most for your use case. Most production systems combine multiple methods to ensure robust assessment of model performance.</p>
+        </section>
+
+        <!-- Section 2: LLM-as-Judge -->
+        <section id="llm-as-judge">
+            <h2>LLM-as-Judge</h2>
+            <p>LLM-as-Judge has emerged as a scalable alternative to human evaluation, offering 500x-5000x cost reductions while maintaining reasonable correlation with human judgment. As of March 2026, this methodology has achieved widespread adoption across the industry with proven effectiveness on straightforward tasks.</p>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Single-Point Scoring</h3>
+                    <p>A single LLM evaluates outputs against predefined criteria, producing scalar scores or categorical judgments.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Rapid prototyping, bulk filtering, initial development iterations, cost-sensitive scenarios</div>
+                    <div class="label">Key Metrics</div>
+                    <div class="value">Cost-Efficiency: 500x-5000x vs human | Latency: ~1-5 seconds</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Single point of failure, model-specific biases, 64-68% agreement with domain experts on specialized tasks</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Pairwise Comparison</h3>
+                    <p>LLM compares two outputs directly, determining which better satisfies evaluation criteria.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Model selection, ranking comparisons, relative quality assessment, preference learning</div>
+                    <div class="label">Key Metrics</div>
+                    <div class="value">Human Correlation: 80% agreement | Consistency: 75%+ on clear cases</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Order bias (earlier option favored), position-dependent preferences, fails on nuanced tasks</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Reference-Based Evaluation</h3>
+                    <p>LLM evaluates output against a reference answer or gold standard, assessing similarity and correctness.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">QA systems, translation evaluation, tasks with definitive correct answers</div>
+                    <div class="label">Key Metrics</div>
+                    <div class="value">Semantic Alignment: High correlation with BERTScore | Consistency: 85%+</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Requires reference answers, penalizes valid paraphrases, fails on open-ended tasks</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Rubric-Based Evaluation</h3>
+                    <p>LLM evaluates against explicit constitutional principles or detailed rubrics, producing justified scores and explanations.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Production systems, explainability requirements, complex multi-dimensional evaluation</div>
+                    <div class="label">Key Metrics</div>
+                    <div class="value">Consistency Rate: 75%+ | Human Agreement: 80%+ on straightforward tasks</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Requires careful rubric design, 25% inconsistency on nuanced judgments, computational overhead</div>
+                </div>
+            </div>
+
+            <h3>Multi-Judge Panel Architecture</h3>
+            <p>For production use, combine 3-5 different LLMs (GPT-4, Claude, Llama, specialists) evaluating the same outputs. Use voting or median aggregation to reduce individual judge bias and improve reliability. Disagreement between judges signals uncertainty and can trigger human review.</p>
+        </section>
+
+        <!-- Section 3: Human Evaluation -->
+        <section id="human-evaluation">
+            <h2>Human Evaluation</h2>
+            <p>Human evaluation remains the gold standard for assessing language model quality, particularly for tasks requiring subjective judgment, cultural understanding, or nuanced reasoning. While more expensive than automated metrics, human evaluation provides irreplaceable ground truth for validating other evaluation methods.</p>
+
+            <h3>Protocol Design</h3>
+            <p>Effective human evaluation requires careful study design with clear research questions, statistical power calculations, and randomization strategies. Key components include:</p>
+            <ul>
+                <li><strong>Research Questions:</strong> Specific aspects being measured (e.g., factual accuracy, helpfulness, safety)</li>
+                <li><strong>Hypotheses:</strong> Testable predictions about model performance or differences</li>
+                <li><strong>Study Design:</strong> Between-subjects, within-subjects, or mixed designs depending on evaluator availability</li>
+                <li><strong>Sample Size:</strong> Typically 50-300 samples per condition; calculated based on effect size, alpha (0.05), and power (0.80)</li>
+                <li><strong>Randomization:</strong> Query order, model order, and evaluator assignment all randomized to reduce bias</li>
+            </ul>
+
+            <h3>Inter-Annotator Agreement</h3>
+            <p>Measure consistency between evaluators using Cohen's Kappa (categorical) or Intraclass Correlation (continuous). Target IAA of 0.70+ indicates acceptable agreement; 0.80+ indicates strong agreement. Lower IAA suggests evaluation criteria need clarification or evaluators require additional training.</p>
+
+            <h3>Scaling Challenges</h3>
+            <p>Human evaluation faces significant scaling challenges: evaluator availability, training consistency, fatigue effects, and cost proportional to sample size. Mitigation strategies include clear evaluation rubrics, quality control sampling, evaluator rotation, and hybrid approaches combining human judgment with automated pre-filtering.</p>
+        </section>
+
+        <!-- Section 4: RAG Evaluation -->
+        <section id="rag-evaluation">
+            <h2>RAG Evaluation</h2>
+            <p>Retrieval-Augmented Generation systems require evaluation at multiple levels: retrieval quality, generation quality, and end-to-end system performance. The RAG Triad encompasses three essential metrics:</p>
+
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>Context Relevance</strong>
+                    <p>Measures whether retrieved documents are relevant to the query. Assesses retrieval system effectiveness independent of generation quality.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>Faithfulness</strong>
+                    <p>Evaluates whether generated responses stay grounded in retrieved context without hallucinating or fabricating information.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>Answer Relevance</strong>
+                    <p>Determines whether the final answer addresses the user's question comprehensively and accurately.</p>
+                </div>
+            </div>
+
+            <h3>Retrieval Metrics</h3>
+            <p>Key metrics for evaluating retrieval quality include Precision@K (fraction of top-K results relevant), Recall@K (fraction of all relevant documents found in top-K), and Mean Reciprocal Rank (position of first relevant document). Precision@5 and Recall@10 are commonly used thresholds for production systems.</p>
+
+            <h3>Generation Quality</h3>
+            <p>Assess the language generation component separately using standard accuracy metrics (BERTScore, semantic similarity) and RAG-specific measures like faithfulness score (claims supported by context / total claims). Critical for detecting when retrieval succeeds but generation fails.</p>
+        </section>
+
+        <!-- Section 5: Pairwise & Elo Systems -->
+        <section id="pairwise-elo">
+            <h2>Pairwise & Elo Systems</h2>
+            <p>Pairwise comparison evaluation, popularized by Chatbot Arena, presents two model outputs side-by-side and asks humans (or LLMs) which is better. These pairwise preferences are then aggregated using the Bradley-Terry model or Elo rating system to produce a global ranking.</p>
+
+            <h3>Chatbot Arena Approach</h3>
+            <p>Users compare anonymous model responses, creating a continuous ranking system where relative performance is clear. Advantages: captures nuanced preferences, avoids absolute scoring anchors, enables comparative leaderboards. Disadvantages: requires many comparisons for convergence, vulnerable to order bias, doesn't provide absolute quality metrics.</p>
+
+            <h3>Bradley-Terry Model</h3>
+            <p>Converts pairwise win-loss data into probability scores: P(A beats B) = pA / (pA + pB). Iteratively estimates skill parameters (p-values) from pairwise comparison outcomes. Provides statistically rigorous ranking with confidence intervals. Requires balanced comparisons to avoid bias toward frequently-compared models.</p>
+
+            <h3>Elo Rating System</h3>
+            <p>Dynamic rating system where each comparison updates both models' ratings based on expected vs. actual outcome. Formula: Rnew = Rold + K(S - Expected), where K controls sensitivity and S is 0 (loss), 0.5 (draw), or 1 (win). Naturally accounts for rating differences and historical performance.</p>
+        </section>
+
+        <!-- Section 6: Contamination Detection -->
+        <section id="contamination">
+            <h2>Contamination Detection</h2>
+            <p>Benchmark leakage (models trained on evaluation data) is a critical threat to valid assessment. Detection methods include:</p>
+            <ul>
+                <li><strong>Direct Matching:</strong> Check if benchmark data appears in model training corpora or documentation. Works for public benchmarks; incomplete for proprietary training data.</li>
+                <li><strong>Performance Anomalies:</strong> Unexpected performance spikes on specific benchmarks relative to related tasks may signal contamination. Compare performance across benchmark difficulty levels.</li>
+                <li><strong>Token-Level Analysis:</strong> Track token probabilities and entropy on benchmark vs. non-benchmark text. Contaminated models show unnaturally high probability on benchmark examples.</li>
+                <li><strong>Few-Shot Sensitivity:</strong> Contaminated models show less learning degradation when few-shot examples are removed or shuffled. Test performance consistency with prompt variations.</li>
+                <li><strong>Temporal Analysis:</strong> For benchmarks released on known dates, analyze model behavior before vs. after that date. Knowledge cutoff documentation helps identify likely contamination.</li>
+            </ul>
+            <p>Best practice: use multiple detection methods in combination, as no single approach is definitive. Flag suspicious results for manual investigation before drawing conclusions about model capabilities.</p>
+        </section>
+
+        <!-- Section 7: Practical Tips -->
+        <section id="practical-tips">
+            <h2>Practical Tips</h2>
+
+            <div class="tips-list">
+                <ul>
+                    <li><strong>Start with Automated Metrics for Speed:</strong> Use LLM-as-Judge or reference-based metrics for rapid iteration during development. Validate findings with human evaluation on a smaller, representative sample before finalizing claims.</li>
+
+                    <li><strong>Combine Multiple Evaluation Methods:</strong> No single method is sufficient. Pair LLM-as-Judge efficiency with human validation on edge cases and ambiguous examples. Use pairwise comparisons to capture preferences alongside absolute quality scores.</li>
+
+                    <li><strong>Control for Evaluator Bias:</strong> Randomize model presentation order, use blind evaluation when possible, and track inter-annotator agreement. Lower IAA signals need for rubric clarification or evaluator training.</li>
+
+                    <li><strong>Monitor Evaluation Consistency:</strong> Test-retest evaluation on the same samples over time to detect drift. LLMs may produce different scores on re-evaluation due to temperature/randomness. Use deterministic settings for reproducibility.</li>
+
+                    <li><strong>Stratify by Query Type and Difficulty:</strong> Don't just report aggregate metrics. Break down performance by query complexity, domain, and language. A 85% average might hide 60% accuracy on specialized technical queries.</li>
+
+                    <li><strong>Use Evaluation as a Development Signal:</strong> Early and frequent evaluation helps identify high-error patterns, guides prompt engineering, and prioritizes which model improvements matter most. Don't wait for final evaluation.</li>
+
+                    <li><strong>Document Evaluation Protocols:</strong> Clearly document your methodology: which metrics, which benchmarks, sample sizes, human study design, and any assumptions. Enables reproducibility and comparison across projects.</li>
+
+                    <li><strong>Validate Automated Metrics Against Human Judgment:</strong> Periodically have humans evaluate a sample of outputs that automated metrics flagged as borderline. Refine metric thresholds based on this ground truth.</li>
+
+                    <li><strong>Be Transparent About Limitations:</strong> Every evaluation method has blind spots. LLM-as-Judge can be overconfident; human evaluation may have small sample bias; benchmarks may not reflect real-world use. Disclose these openly.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 8: Related Resources -->
+        <section id="resources">
+            <h2>Related Resources</h2>
+
+            <div class="resources-grid">
+                <a href="index.html" class="resource-link">
+                    <strong>← Framework Overview</strong>
+                    <p>Return to the main LLM Evaluation Framework</p>
+                    <span class="resource-link-label">Core</span>
+                </a>
+
+                <a href="accuracy.html" class="resource-link">
+                    <strong>Accuracy Pillar</strong>
+                    <p>Detailed metrics and benchmarks for measuring factual correctness and output quality</p>
+                    <span class="resource-link-label">Pillar</span>
+                </a>
+
+                <a href="index.html#benchmarks" class="resource-link">
+                    <strong>Benchmarks & Leaderboards</strong>
+                    <p>Comprehensive list of standardized evaluation benchmarks with links and performance data</p>
+                    <span class="resource-link-label">Reference</span>
+                </a>
+
+                <a href="index.html#labs" class="resource-link">
+                    <strong>Tools & Frameworks</strong>
+                    <p>Open-source libraries for implementing LLM-as-Judge, human evaluation workflows, and RAG assessment</p>
+                    <span class="resource-link-label">Tools</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Other Pillars</strong>
+                    <p>Explore other evaluation dimensions: Efficiency, Robustness, Fairness, Interpretability</p>
+                    <span class="resource-link-label">Explore</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <p>LLM Evaluation Framework | Methods Pillar</p>
+        <p>Comprehensive guide to evaluation methodologies and best practices. <a href="index.html">Learn more</a></p>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark-mode');
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeToggleIcon();
+        });
+
+        function updateThemeToggleIcon() {
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Load theme preference
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            htmlElement.classList.remove('dark-mode');
+        }
+        updateThemeToggleIcon();
+
+        // Back to top button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

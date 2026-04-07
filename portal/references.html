@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>References & Resources in LLM Evaluation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: background-color 0.3s ease;
+        }
+
+        nav a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            color: var(--color-accent);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header Section */
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.8rem;
+            background-color: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Metrics Cards (reused for glossary terms) */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .metric-card h3 {
+            margin-top: 0;
+            color: var(--color-accent);
+            font-size: 1.2rem;
+        }
+
+        .metric-card .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .metric-card .when-to-use,
+        .metric-card .pitfalls {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-card .when-to-use {
+            color: var(--color-accent-light);
+        }
+
+        .metric-card .pitfalls {
+            color: #ff9999;
+        }
+
+        /* Benchmarks */
+        .benchmarks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .benchmark-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .benchmark-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .benchmark-item strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .benchmark-item p {
+            margin-bottom: 0;
+        }
+
+        .benchmark-item .authors {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .benchmark-item .year {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-top: 0.25rem;
+        }
+
+        /* Tips Section */
+        .tips-list {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tips-list li {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .resource-link {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-link strong {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-link-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.1);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--color-accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.95rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .benchmarks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">← Back to Framework</a>
+        <div class="nav-right">
+            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>References & Resources</h1>
+            <p class="subtitle">60+ papers, comprehensive glossary, and quarterly changelog</p>
+        </header>
+
+        <!-- Section 1: Paper Reading List -->
+        <section id="papers">
+            <h2>Paper Reading List</h2>
+            <p>A curated collection of foundational and recent research papers on LLM evaluation. Essential reading for understanding current evaluation methodologies and best practices.</p>
+
+            <h3>Foundational Evaluation Methods</h3>
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>Evaluating Large Language Models Trained on Code</strong>
+                    <p>Introduced CodeBLEU and early automated metrics for code evaluation, foundational for programming benchmarks.</p>
+                    <div class="authors">Zhuo et al.</div>
+                    <div class="year">2021</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>HELM: Holistic Evaluation of Language Models</strong>
+                    <p>Comprehensive framework for multi-dimensional evaluation across 42 scenarios; became foundational methodology for holistic evaluation.</p>
+                    <div class="authors">Liang et al.</div>
+                    <div class="year">2022</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>On Evaluating and Comparing Open Domain Dialog Systems</strong>
+                    <p>Taxonomy of dialog evaluation approaches; discusses trade-offs between automatic metrics and human evaluation.</p>
+                    <div class="authors">Shuster et al.</div>
+                    <div class="year">2021</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>GLUE: A Multi-Task Benchmark for NLU</strong>
+                    <p>Landmark benchmark suite establishing standard tasks for natural language understanding evaluation across diverse domains.</p>
+                    <div class="authors">Wang et al.</div>
+                    <div class="year">2018</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Towards a Unified Benchmark for Real-World Knowledge</strong>
+                    <p>Examined knowledge gaps and proposed knowledge-grounded evaluation methodologies for assessing factual accuracy.</p>
+                    <div class="authors">Mo et al.</div>
+                    <div class="year">2023</div>
+                </div>
+            </div>
+
+            <h3>LLM-as-Judge Methods</h3>
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>LLMs-as-Judges: A Comprehensive Survey</strong>
+                    <p>Survey covering bias sources, prompt engineering, validity threats, and best practices for using LLMs to evaluate outputs.</p>
+                    <div class="authors">Ding et al.</div>
+                    <div class="year">2024</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>A Survey on LLM-as-a-Judge</strong>
+                    <p>Analysis of LLM-as-judge paradigm, agreement with human evaluators, and methodological considerations.</p>
+                    <div class="authors">Various</div>
+                    <div class="year">2024</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>GPT-4 as a Judge: Systematic Analysis</strong>
+                    <p>Analyzes GPT-4 as evaluator, exploring agreement with humans, bias patterns, and prompt sensitivity in evaluation tasks.</p>
+                    <div class="authors">Bubeck et al.</div>
+                    <div class="year">2023</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Prometheus: Fine-grained Evaluation Rubrics</strong>
+                    <p>Method for training smaller models to reliably evaluate outputs using reference-based rubrics, reducing dependence on proprietary judges.</p>
+                    <div class="authors">Kim et al.</div>
+                    <div class="year">2023</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Evaluating LLMs at Evaluating Other LLMs</strong>
+                    <p>Studies agreement between LLM judges and human judges, identifying calibration issues and reliability concerns.</p>
+                    <div class="authors">Chen et al.</div>
+                    <div class="year">2023</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>When Judges Compete: Multi-Criteria Evaluation</strong>
+                    <p>Investigates multi-criteria evaluation scenarios and judge disagreement patterns in complex assessment tasks.</p>
+                    <div class="authors">Xu et al.</div>
+                    <div class="year">2024</div>
+                </div>
+            </div>
+
+            <h3>Benchmarks & Performance Evaluation</h3>
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>MMLU-Pro: Professional Knowledge Benchmark</strong>
+                    <p>12,000+ questions across STEM, humanities, law, and medicine. Measures factual knowledge accuracy at professional level.</p>
+                    <div class="authors">Various</div>
+                    <div class="year">2023-2024</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>TruthfulQA</strong>
+                    <p>Evaluates model tendencies to produce true vs. false statements. Designed to catch hallucinations under real-world ambiguity.</p>
+                    <div class="authors">Lin et al.</div>
+                    <div class="year">2021</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>HaluEval: Hallucination Detection</strong>
+                    <p>Synthetic benchmark for hallucination detection across generative, factuality, and idiomatic categories. Critical for production safety.</p>
+                    <div class="authors">Various</div>
+                    <div class="year">2023</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>SimpleQA</strong>
+                    <p>Factual QA benchmark with unambiguous answers. Evaluates straightforward factual recall without relying on complex reasoning.</p>
+                    <div class="authors">Various</div>
+                    <div class="year">2024</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>FreshQA: Temporal Knowledge Testing</strong>
+                    <p>Tests temporal accuracy and how well models handle recent, time-sensitive information. Reveals knowledge cutoff limitations.</p>
+                    <div class="authors">Various</div>
+                    <div class="year">2024</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>RAGAS: RAG Assessment</strong>
+                    <p>Comprehensive measure of retrieval-augmented generation including context relevance, faithfulness, and answer relevance together.</p>
+                    <div class="authors">Various</div>
+                    <div class="year">2023</div>
+                </div>
+            </div>
+
+            <h3>Safety & Alignment</h3>
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>RealToxicityPrompts</strong>
+                    <p>Dataset for evaluating model outputs for harmful, toxic, or biased content. Essential for safety-critical deployment evaluation.</p>
+                    <div class="authors">Various</div>
+                    <div class="year">2020</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Chatbot Arena: Human Preference Evaluation</strong>
+                    <p>Large-scale platform using Elo ratings from pairwise human comparisons. Provides statistically grounded model rankings.</p>
+                    <div class="authors">LMSYS</div>
+                    <div class="year">2023</div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>MT-Bench: Multi-Turn Instruction Following</strong>
+                    <p>Instruction-following benchmark for multi-turn conversations. Enables comparative ranking of instruction-tuned models.</p>
+                    <div class="authors">LMSYS</div>
+                    <div class="year">2023</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Glossary -->
+        <section id="glossary">
+            <h2>Glossary</h2>
+            <p>Key terms and concepts essential to understanding LLM evaluation. Each definition is designed for both practitioners and researchers.</p>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Hallucination</h3>
+                    <p>When a model generates plausible-sounding but factually incorrect or fabricated information not present in training data or provided context.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Faithfulness, Factual Consistency, Accuracy</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Contamination</h3>
+                    <p>Situation where model training data contains test examples from an evaluation benchmark, inflating reported performance and invalidating claims.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Benchmark Integrity, Evaluation Design</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Elo Rating</h3>
+                    <p>Statistical ranking system from pairwise comparisons. Widely used in Chatbot Arena to rank models based on human preferences with uncertainty quantification.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Preference-Based Evaluation, Leaderboards</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Perplexity</h3>
+                    <p>Measure of how surprised a language model is by a given sequence. Lower perplexity indicates better fit. Common for language modeling tasks.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Language Modeling, Generation Quality</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>BLEU</h3>
+                    <p>N-gram overlap metric comparing generated text to references using precision with brevity penalty. Widely used for machine translation evaluation.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Translation, Summarization, Text Generation</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>ROUGE</h3>
+                    <p>Recall-focused n-gram overlap metric. Widely used for summarization evaluation. Variants include ROUGE-N, ROUGE-L, and ROUGE-W.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Summarization, Document Generation</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Faithfulness</h3>
+                    <p>Degree to which output is grounded in and consistent with provided source material. Critical metric for RAG and citation-required tasks.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">RAG Systems, Document-Grounded QA</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Chain-of-Thought</h3>
+                    <p>Prompting technique where model outputs reasoning steps before final answer. Evaluation can assess reasoning quality separately from correctness.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Reasoning Tasks, Explainability</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Few-Shot Learning</h3>
+                    <p>Model adaptation using small number of examples in prompt context. Important for evaluating generalization and in-context learning capability.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Generalization, Adaptation, Efficiency</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Zero-Shot Learning</h3>
+                    <p>Model performance without any task-specific examples. Tests inherent model knowledge and capabilities without adaptation.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Generalization, Capability Assessment</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>RAG (Retrieval-Augmented Generation)</h3>
+                    <p>System combining document retrieval with generation to ground outputs in external knowledge. Critical for reducing hallucinations and ensuring freshness.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Knowledge-Intensive Tasks, Hallucination Reduction</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Fine-Tuning</h3>
+                    <p>Training process where pre-trained model weights are adjusted on task-specific data. Evaluation must account for overfitting and domain shift risks.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Model Adaptation, Performance Optimization</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Alignment</h3>
+                    <p>Degree to which model behavior matches intended values and constraints including honesty, helpfulness, harmlessness, and safety guidelines adherence.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Safety, Value Alignment, Deployment</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>BERTScore</h3>
+                    <p>Semantic similarity metric using contextual embeddings to capture meaning beyond surface-level n-grams. Better correlation with human judgment.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Open-Ended Generation, Paraphrase Detection</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Calibration</h3>
+                    <p>Agreement between model confidence and actual correctness. Well-calibrated models assign high confidence to correct answers and low to incorrect ones.</p>
+                    <div class="label">Related To</div>
+                    <div class="when-to-use">Uncertainty, Reliability, Trust</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Changelog -->
+        <section id="changelog">
+            <h2>Eval Landscape Changelog</h2>
+            <p>Quarterly chronicle of major developments in LLM evaluation. Tracks model releases, benchmark innovations, tooling advances, and methodological progress.</p>
+
+            <h3>Q1 2026: Multimodal Integration</h3>
+            <p>Integration of multimodal evaluation benchmarks across vision, audio, and text domains. Emergence of unified evaluation frameworks combining multiple modalities.</p>
+
+            <h3>Q4 2025: Judge Standardization</h3>
+            <p>Significant advances in LLM-as-judge standardization with comprehensive bias analysis and calibration techniques. Community convergence on evaluation rubrics and prompting strategies.</p>
+
+            <h3>Q3 2025: Scale & Efficiency Focus</h3>
+            <p>Shift toward evaluating efficient models and quantized variants. Development of lightweight evaluation pipelines suitable for resource-constrained environments.</p>
+
+            <h3>Q2 2025: Temporal Knowledge Emphasis</h3>
+            <p>Increased focus on temporal accuracy and knowledge freshness evaluation. Introduction of FreshQA and similar benchmarks highlighting knowledge cutoff limitations.</p>
+
+            <h3>Q1 2025: Contamination Awareness</h3>
+            <p>Industry-wide recognition of benchmark contamination risks. Development of contamination detection techniques and stricter evaluation protocols across leaderboards.</p>
+
+            <h3>Q4 2024: Reasoning Benchmarks Proliferation</h3>
+            <p>Explosive growth in reasoning-focused benchmarks (ARC-AGI, FrontierMath, AIME). Emphasis on complex multi-step reasoning evaluation.</p>
+
+            <h3>Q3 2024: LLM Judge Surveys Published</h3>
+            <p>Multiple comprehensive surveys on LLM-as-judge paradigm. Critical analysis of bias sources, validity threats, and best practices in judge-based evaluation.</p>
+
+            <h3>Q2 2024: RAG Evaluation Advances</h3>
+            <p>RAGAS framework gains traction for comprehensive RAG evaluation. Integration of retrieval quality, faithfulness, and answer relevance in unified metrics.</p>
+
+            <h3>Q1 2024: Multi-Turn Conversation Focus</h3>
+            <p>Increasing emphasis on multi-turn conversation evaluation over single-turn benchmarks. MT-Bench and Chatbot Arena become standard evaluation platforms.</p>
+
+            <h3>Q4 2023: Open-Source Model Boom</h3>
+            <p>Explosion of open-source models (Mistral, Llama 2) driving need for accessible evaluation frameworks. Community-driven benchmark development accelerates.</p>
+
+            <h3>Q3 2023: Long-Context Evaluation</h3>
+            <p>Needle in a Haystack benchmark launched (August 2023). Evaluates long-context retrieval capability as context windows expand across models.</p>
+
+            <h3>Q2 2023: Benchmark Explosion</h3>
+            <p>Chatbot Arena launched (March 2023) with Bradley-Terry ELO methodology. MT-Bench released for instruction-following evaluation. Preference-based evaluation gains momentum.</p>
+
+            <h3>Q1 2023: Foundation Era</h3>
+            <p>GPT-4 released (March 2023) establishing new evaluation baseline and setting de facto standard as judge model. HELM framework published establishing holistic evaluation practices.</p>
+        </section>
+
+        <!-- Section 4: Related Resources -->
+        <section id="resources">
+            <h2>Related Resources</h2>
+            <p>Navigate to other evaluation framework pillars and core sections:</p>
+
+            <div class="resources-grid">
+                <a href="index.html" class="resource-link">
+                    <strong>← Framework Overview</strong>
+                    <p>Return to the main LLM Evaluation Framework hub</p>
+                    <span class="resource-link-label">Core</span>
+                </a>
+
+                <a href="foundations.html" class="resource-link">
+                    <strong>Foundations Pillar</strong>
+                    <p>Core concepts and mathematical foundations of LLM evaluation</p>
+                    <span class="resource-link-label">Pillar</span>
+                </a>
+
+                <a href="benchmarks.html" class="resource-link">
+                    <strong>Benchmarks Pillar</strong>
+                    <p>Comprehensive guide to evaluation benchmarks and leaderboards</p>
+                    <span class="resource-link-label">Pillar</span>
+                </a>
+
+                <a href="methods.html" class="resource-link">
+                    <strong>Methods Pillar</strong>
+                    <p>Evaluation methodologies and practical implementation strategies</p>
+                    <span class="resource-link-label">Pillar</span>
+                </a>
+
+                <a href="accuracy.html" class="resource-link">
+                    <strong>Accuracy Pillar</strong>
+                    <p>Measuring output correctness, relevance, and faithfulness</p>
+                    <span class="resource-link-label">Pillar</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Other Evaluation Pillars</strong>
+                    <p>Explore Robustness, Fairness, Interpretability, and Efficiency pillars</p>
+                    <span class="resource-link-label">Explore</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <p>LLM Evaluation Framework | References Pillar</p>
+        <p>Part of the comprehensive guide to evaluating large language models. <a href="index.html">Learn more</a></p>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark-mode');
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeToggleIcon();
+        });
+
+        function updateThemeToggleIcon() {
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Load theme preference
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            htmlElement.classList.remove('dark-mode');
+        }
+        updateThemeToggleIcon();
+
+        // Back to top button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

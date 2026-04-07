@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hands-On Labs - LLM Evaluation Framework</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: background-color 0.3s ease;
+        }
+
+        nav a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            color: var(--color-accent);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header Section */
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.8rem;
+            background-color: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Benchmarks/Lab Cards */
+        .benchmarks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .benchmark-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .benchmark-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .benchmark-item strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .benchmark-item p {
+            margin-bottom: 0.75rem;
+        }
+
+        .lab-skills {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* Tips Section */
+        .tips-list {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tips-list li {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .resource-link {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-link strong {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-link-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.1);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--color-accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.95rem;
+            }
+
+            .benchmarks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">← Back to Framework</a>
+        <div class="nav-right">
+            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>Hands-On Labs</h1>
+            <p class="subtitle">9 progressive labs — from basic benchmarking to advanced evaluation systems</p>
+        </header>
+
+        <!-- Section 1: Lab Overview -->
+        <section id="lab-overview">
+            <h2>Lab Overview</h2>
+            <p>The Hands-On Labs pillar provides a progressive learning path from beginner to advanced evaluation techniques. Each lab builds on previous knowledge and introduces new tools, concepts, and frameworks for evaluating language models.</p>
+
+            <h3>Progressive Learning Path</h3>
+            <p>The labs are organized by difficulty level:</p>
+            <ul>
+                <li><strong>Green (Beginner):</strong> Labs 1-2. Foundational skills with standard benchmarking and LLM-as-judge evaluation.</li>
+                <li><strong>Yellow (Intermediate):</strong> Labs 3-6. Domain-specific evaluation, RAG evaluation, and statistical analysis.</li>
+                <li><strong>Red (Advanced):</strong> Labs 7-9. Agentic evaluation, CI/CD integration, and Pareto-optimal model selection.</li>
+            </ul>
+
+            <h3>Prerequisites</h3>
+            <ul>
+                <li>Python 3.11 or higher</li>
+                <li>Basic familiarity with command line and Git</li>
+                <li>Understanding of machine learning evaluation concepts (though not required for Lab 1)</li>
+                <li>API keys for at least one LLM provider (OpenAI, Anthropic, etc.)</li>
+                <li>Jupyter notebook environment (recommended for hands-on work)</li>
+            </ul>
+
+            <h3>What You'll Build</h3>
+            <p>By completing all 9 labs, you'll have hands-on experience with:</p>
+            <ul>
+                <li>Running comprehensive benchmark suites on open-weight and closed models</li>
+                <li>Building custom evaluation rubrics and LLM-as-judge systems</li>
+                <li>Evaluating RAG systems and domain-specific applications</li>
+                <li>Performing statistical analysis and significance testing</li>
+                <li>Red-teaming models for safety and robustness</li>
+                <li>Evaluating agentic and complex reasoning systems</li>
+                <li>Integrating evaluation into CI/CD pipelines</li>
+                <li>Making data-driven model selection decisions using Pareto analysis</li>
+            </ul>
+        </section>
+
+        <!-- Section 2: Lab Directory -->
+        <section id="lab-directory">
+            <h2>Lab Directory</h2>
+            <p>Each lab includes step-by-step instructions, code examples, and practical exercises. All labs use Jupyter notebooks and have estimated completion times.</p>
+
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>Lab 1: Basic Benchmark Suite</strong>
+                    <p>Install lm-evaluation-harness, run MMLU-Pro and IFEval on open-weight models, and interpret results. Create your first evaluation baseline.</p>
+                    <div class="lab-skills">
+                        <strong>Skills:</strong> Framework setup, benchmark configuration, result interpretation
+                    </div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Lab 2: LLM-as-Judge</strong>
+                    <p>Design evaluation rubrics, implement pointwise LLM judges using LiteLLM, and measure inter-rater agreement. Calibrate judges for better accuracy.</p>
+                    <div class="lab-skills">
+                        <strong>Skills:</strong> Rubric design, LLM API integration, Cohen's kappa, calibration
+                    </div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Lab 3: RAG Evaluation</strong>
+                    <p>Build and evaluate retrieval-augmented generation systems. Measure context relevance, faithfulness, and answer quality using RAGAS framework.</p>
+                    <div class="lab-skills">
+                        <strong>Skills:</strong> RAG pipelines, retrieval metrics, faithfulness evaluation, semantic search
+                    </div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Lab 4: Custom Domain Evaluation</strong>
+                    <p>Create evaluation suites for specialized domains (legal, medical, technical). Build domain-specific metrics and benchmarks from scratch.</p>
+                    <div class="lab-skills">
+                        <strong>Skills:</strong> Domain analysis, custom metric design, benchmark creation, data annotation
+                    </div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Lab 5: Statistical Analysis</strong>
+                    <p>Perform significance testing, confidence intervals, and power analysis. Compare model performance rigorously with statistical backing.</p>
+                    <div class="lab-skills">
+                        <strong>Skills:</strong> Hypothesis testing, t-tests, bootstrap methods, effect sizes, sample sizing
+                    </div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Lab 6: Safety Red-Teaming</strong>
+                    <p>Design adversarial prompts to identify model vulnerabilities. Evaluate robustness against jailbreaks, toxic inputs, and edge cases.</p>
+                    <div class="lab-skills">
+                        <strong>Skills:</strong> Adversarial testing, attack design, vulnerability identification, safety metrics
+                    </div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Lab 7: Agentic Evaluation</strong>
+                    <p>Evaluate complex systems with multi-step reasoning and tool use. Assess trajectory quality, step-level accuracy, and long-horizon planning.</p>
+                    <div class="lab-skills">
+                        <strong>Skills:</strong> Agent evaluation frameworks, trajectory analysis, tool integration, planning metrics
+                    </div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Lab 8: CI/CD Integration</strong>
+                    <p>Automate evaluation in continuous integration pipelines. Set up guardrails, performance monitoring, and regression detection in production.</p>
+                    <div class="lab-skills">
+                        <strong>Skills:</strong> CI/CD setup, automated testing, monitoring, alerting, regression detection
+                    </div>
+                </div>
+
+                <div class="benchmark-item">
+                    <strong>Lab 9: Pareto Model Selection</strong>
+                    <p>Analyze trade-offs between accuracy, cost, and latency. Use Pareto frontier analysis to select optimal models for different use cases.</p>
+                    <div class="lab-skills">
+                        <strong>Skills:</strong> Multi-objective optimization, Pareto analysis, cost-benefit modeling, interactive visualization
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Getting Started -->
+        <section id="getting-started">
+            <h2>Getting Started</h2>
+
+            <h3>Setup Instructions</h3>
+            <p>All labs assume you have a working Python environment with Jupyter notebooks.</p>
+
+            <ol>
+                <li>Create a dedicated workspace:
+                    <ul>
+                        <li><code>mkdir -p ~/llm-eval-labs && cd ~/llm-eval-labs</code></li>
+                    </ul>
+                </li>
+                <li>Clone the evaluation framework repository:
+                    <ul>
+                        <li><code>git clone https://github.com/your-org/llm-evaluation-framework.git</code></li>
+                        <li><code>cd llm-evaluation-framework</code></li>
+                    </ul>
+                </li>
+                <li>Create a Python virtual environment:
+                    <ul>
+                        <li><code>python3.11 -m venv venv</code></li>
+                        <li><code>source venv/bin/activate  # On Windows: venv\Scripts\activate</code></li>
+                    </ul>
+                </li>
+                <li>Install dependencies:
+                    <ul>
+                        <li><code>pip install --upgrade pip</code></li>
+                        <li><code>pip install -r requirements-labs.txt</code></li>
+                    </ul>
+                </li>
+                <li>Configure your API credentials (if using closed-source models):
+                    <ul>
+                        <li>Create a <code>.env</code> file in the labs directory</li>
+                        <li>Add your API keys: <code>OPENAI_API_KEY=sk-...</code>, <code>ANTHROPIC_API_KEY=sk-ant-...</code>, etc.</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>Jupyter Environment</h3>
+            <p>Each lab includes a Jupyter notebook for interactive learning and experimentation:</p>
+            <ol>
+                <li>Start Jupyter from the labs directory:
+                    <ul>
+                        <li><code>jupyter notebook</code></li>
+                    </ul>
+                </li>
+                <li>Navigate to the <code>labs/</code> directory</li>
+                <li>Open the notebook for your lab (e.g., <code>lab-01-basic-benchmark.ipynb</code>)</li>
+                <li>Follow the guided steps and run cells sequentially</li>
+            </ol>
+
+            <h3>Prerequisites by Lab</h3>
+            <ul>
+                <li><strong>Labs 1-2:</strong> Python 3.11+, pip, virtualenv. API key for at least one LLM provider.</li>
+                <li><strong>Lab 3:</strong> Completion of Lab 1-2. Vector database (Chroma, Pinecone, or similar).</li>
+                <li><strong>Lab 4:</strong> Domain expertise or domain-specific dataset. Access to subject matter experts for annotation.</li>
+                <li><strong>Lab 5:</strong> Completion of Lab 1-3. Basic statistics knowledge (distributions, p-values).</li>
+                <li><strong>Lab 6:</strong> Completion of Lab 1-2. Optional: security/ML background for designing effective adversarial prompts.</li>
+                <li><strong>Lab 7:</strong> Completion of Lab 1-3. Access to a tool-use or agentic framework (LangChain, AutoGen, etc.).</li>
+                <li><strong>Lab 8:</strong> Completion of Lab 1-5. Familiarity with CI/CD tools (GitHub Actions, GitLab CI, etc.).</li>
+                <li><strong>Lab 9:</strong> Completion of Lab 1-5. Understanding of multi-objective optimization concepts.</li>
+            </ul>
+        </section>
+
+        <!-- Section 4: Practical Tips -->
+        <section id="practical-tips">
+            <h2>Practical Tips</h2>
+
+            <div class="tips-list">
+                <ul>
+                    <li><strong>Start with Lab 1:</strong> Even if you're experienced, Lab 1 establishes the evaluation framework and concepts used in all subsequent labs. Skipping it may cause confusion.</li>
+
+                    <li><strong>Run on Representative Data:</strong> Don't just use the provided examples. Find or create test cases that reflect your actual use case. Evaluation results on toy data often don't generalize.</li>
+
+                    <li><strong>Track Results Systematically:</strong> Save all evaluation outputs, model configurations, and benchmark results to a version-controlled directory. Use consistent naming conventions (e.g., <code>eval_2025-04-08_model-v1.json</code>).</li>
+
+                    <li><strong>Use Appropriate Compute:</strong> Some labs benefit from GPU acceleration. Lab 1 can run on CPU but will be much faster with a GPU. Labs 6-9 may require significant compute—plan accordingly or use cloud services.</li>
+
+                    <li><strong>Iterate on Rubrics:</strong> In Lab 2, your initial rubric won't be perfect. Run evaluation, analyze disagreements between human and LLM judges, and refine. Iteration is key.</li>
+
+                    <li><strong>Document Decisions:</strong> For Labs 4 and 9, document why you chose specific metrics, models, or thresholds. Future-you (and your team) will appreciate the reasoning.</li>
+
+                    <li><strong>Validate on Out-of-Distribution Data:</strong> Always hold out a test set that's different from your training/evaluation data. Evaluation metrics that look good on in-distribution data may not transfer.</li>
+
+                    <li><strong>Control for Confounding Variables:</strong> When comparing models, ensure all variables except the one you're testing are controlled. For example, when testing prompt engineering, use identical models and only vary prompts.</li>
+
+                    <li><strong>Engage Domain Experts Early:</strong> Especially in Labs 4 and 6, involve domain experts in rubric design and adversarial prompt creation. Their insights are invaluable.</li>
+
+                    <li><strong>Monitor for Bias:</strong> In Labs 5 and 9, disaggregate results by demographic groups, topics, or other relevant dimensions. A model may perform well overall but poorly on specific subgroups.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 5: Related Resources -->
+        <section id="resources">
+            <h2>Related Resources</h2>
+
+            <div class="resources-grid">
+                <a href="index.html" class="resource-link">
+                    <strong>← Framework Overview</strong>
+                    <p>Return to the main LLM Evaluation Framework</p>
+                    <span class="resource-link-label">Core</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Evaluation Methods</strong>
+                    <p>Deep-dive into evaluation methodologies and best practices</p>
+                    <span class="resource-link-label">Methods</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Tooling & Infrastructure</strong>
+                    <p>Tools, frameworks, and infrastructure for running evaluations at scale</p>
+                    <span class="resource-link-label">Tools</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Accuracy Pillar</strong>
+                    <p>Learn about measuring correctness, factuality, and hallucinations</p>
+                    <span class="resource-link-label">Pillar</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Robustness Pillar</strong>
+                    <p>Evaluate model resilience against adversarial inputs and edge cases</p>
+                    <span class="resource-link-label">Pillar</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Other Pillars</strong>
+                    <p>Explore Efficiency, Fairness, Interpretability, and more</p>
+                    <span class="resource-link-label">Explore</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <p>LLM Evaluation Framework | Labs Pillar</p>
+        <p>Hands-on labs for evaluating large language models. <a href="index.html">Learn more</a></p>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark-mode');
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeToggleIcon();
+        });
+
+        function updateThemeToggleIcon() {
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Load theme preference
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            htmlElement.classList.remove('dark-mode');
+        }
+        updateThemeToggleIcon();
+
+        // Back to top button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

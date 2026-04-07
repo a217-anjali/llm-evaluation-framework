@@ -271,7 +271,7 @@
         }
 
         .hero h1 {
-            font-size: clamp(32px, 5vw, 56px);
+            font-size: clamp(28px, 4vw, 46px);
             font-weight: 700;
             line-height: 1.2;
             margin-bottom: 20px;
@@ -362,6 +362,89 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 4px;
+        }
+
+        /* Evaluation Pipeline */
+        .pipeline-section {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid var(--color-border);
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .pipeline-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .pipeline-grid {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pipeline-step {
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 18px 16px;
+            text-align: center;
+            flex: 0 1 150px;
+            min-width: 130px;
+        }
+
+        .pipeline-number {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+            color: var(--color-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            margin: 0 auto 10px;
+        }
+
+        .pipeline-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--color-text);
+            margin-bottom: 8px;
+        }
+
+        .pipeline-detail {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            line-height: 1.5;
+        }
+
+        .pipeline-arrow {
+            color: var(--color-accent);
+            font-size: 20px;
+            font-weight: 700;
+            align-self: center;
+            margin-top: -10px;
+        }
+
+        @media (max-width: 900px) {
+            .pipeline-arrow { display: none; }
+            .pipeline-grid { gap: 12px; }
+            .pipeline-step { flex: 0 1 calc(33% - 12px); }
+        }
+
+        @media (max-width: 600px) {
+            .pipeline-step { flex: 0 1 calc(50% - 8px); }
         }
 
         /* Sections Container */
@@ -1249,9 +1332,9 @@
         <!-- Hero Section -->
         <section class="hero" id="overview">
             <div class="hero-content">
-                <h1>The Definitive Open-Source Framework for LLM Evaluation</h1>
-                <p class="hero-subtitle">Comprehensive benchmarks, evaluation tools, hands-on labs, and production guidance for assessing and improving large language models.</p>
-                <p class="hero-byline">Created for researchers, engineers, and AI practitioners | Last Updated March 31, 2026</p>
+                <h1>The LLM Evaluation Handbook: From Benchmarks to Production</h1>
+                <p class="hero-subtitle">A structured, open-source reference for evaluating large language models — covering metrics, benchmarks, tooling, and production deployment with rigorous methodology and reproducible code.</p>
+                <p class="hero-byline">For researchers, ML engineers, and AI practitioners | Last Updated March 31, 2026</p>
                 <div class="hero-buttons">
                     <button class="btn-primary">Explore Framework</button>
                     <button class="btn-secondary">View on GitHub</button>
@@ -1272,6 +1355,47 @@
                     <div class="stat">
                         <div class="stat-number">60+</div>
                         <div class="stat-label">Papers</div>
+                    </div>
+                </div>
+                <!-- Evaluation Pipeline -->
+                <div class="pipeline-section">
+                    <h3 class="pipeline-title">The Evaluation Pipeline</h3>
+                    <div class="pipeline-grid">
+                        <div class="pipeline-step">
+                            <div class="pipeline-number">1</div>
+                            <div class="pipeline-name">Define Objectives</div>
+                            <div class="pipeline-detail">Identify use-case requirements, success criteria, and evaluation dimensions (accuracy, safety, cost, latency).</div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">
+                            <div class="pipeline-number">2</div>
+                            <div class="pipeline-name">Select Benchmarks</div>
+                            <div class="pipeline-detail">Choose from 50+ validated benchmarks across reasoning, coding, knowledge, and multimodal domains.</div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">
+                            <div class="pipeline-number">3</div>
+                            <div class="pipeline-name">Choose Methods</div>
+                            <div class="pipeline-detail">Apply LLM-as-judge, human evaluation, pairwise ranking, or custom rubric-based approaches.</div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">
+                            <div class="pipeline-number">4</div>
+                            <div class="pipeline-name">Run Evaluation</div>
+                            <div class="pipeline-detail">Execute evaluations using standardised harnesses with contamination checks and statistical controls.</div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">
+                            <div class="pipeline-number">5</div>
+                            <div class="pipeline-name">Analyse Results</div>
+                            <div class="pipeline-detail">Interpret scores with confidence intervals, effect sizes, and Pareto-optimal model selection.</div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">
+                            <div class="pipeline-number">6</div>
+                            <div class="pipeline-name">Monitor in Production</div>
+                            <div class="pipeline-detail">Deploy continuous evaluation, drift detection, and automated regression alerts at scale.</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1332,49 +1456,49 @@
                     <h3 class="pillar-title">Foundations</h3>
                     <p class="pillar-desc">Core evaluation theory, metrics design, and statistical rigor. Build evaluation literacy from first principles.</p>
                     <p class="pillar-topics">Accuracy, validity, bias, fairness, reliability, calibration</p>
-                    <a href="#overview-detail" class="pillar-link">Learn More →</a>
+                    <a href="foundations.html" class="pillar-link">Learn More →</a>
                 </div>
                 <div class="pillar-card fade-in">
                     <div class="pillar-icon">📊</div>
                     <h3 class="pillar-title">Benchmarks</h3>
                     <p class="pillar-desc">Comprehensive mapping of 50+ public benchmarks across reasoning, coding, knowledge, and multimodal domains.</p>
                     <p class="pillar-topics">MMLU-Pro, GPQA, GSM8K, HumanEval, MATH, MMBench</p>
-                    <a href="#benchmarks" class="pillar-link">Explore →</a>
+                    <a href="benchmarks.html" class="pillar-link">Explore →</a>
                 </div>
                 <div class="pillar-card fade-in">
                     <div class="pillar-icon">🔬</div>
                     <h3 class="pillar-title">Methods</h3>
                     <p class="pillar-desc">Hands-on evaluation techniques: zero-shot, few-shot, chain-of-thought, reference-based, and LLM-as-judge approaches.</p>
                     <p class="pillar-topics">Prompting, chain-of-thought, self-consistency, ensemble methods</p>
-                    <a href="#benchmarks" class="pillar-link">Deep Dive →</a>
+                    <a href="methods.html" class="pillar-link">Deep Dive →</a>
                 </div>
                 <div class="pillar-card fade-in">
                     <div class="pillar-icon">🛠️</div>
                     <h3 class="pillar-title">Tooling</h3>
                     <p class="pillar-desc">Critical analysis of 25+ evaluation frameworks: Inspect AI, DeepEval, lm-evaluation-harness, Ragas, and more.</p>
                     <p class="pillar-topics">Frameworks, SDKs, orchestration, scaling, MLOps integration</p>
-                    <a href="#tools" class="pillar-link">Compare Tools →</a>
+                    <a href="tooling.html" class="pillar-link">Compare Tools →</a>
                 </div>
                 <div class="pillar-card fade-in">
                     <div class="pillar-icon">🧪</div>
                     <h3 class="pillar-title">Labs</h3>
                     <p class="pillar-desc">9 hands-on labs with code notebooks: from basic benchmarking to advanced LLM-as-judge systems and custom metrics.</p>
                     <p class="pillar-topics">Runnable experiments, real datasets, production patterns</p>
-                    <a href="#labs" class="pillar-link">Start Lab →</a>
+                    <a href="labs.html" class="pillar-link">Start Lab →</a>
                 </div>
                 <div class="pillar-card fade-in">
                     <div class="pillar-icon">🚀</div>
                     <h3 class="pillar-title">Production</h3>
                     <p class="pillar-desc">Continuous evaluation, monitoring, and governance. Deploy evaluation systems that scale with your models.</p>
                     <p class="pillar-topics">Continuous monitoring, alerting, versioning, EvalOps</p>
-                    <a href="#production" class="pillar-link">Deploy →</a>
+                    <a href="production.html" class="pillar-link">Deploy →</a>
                 </div>
                 <div class="pillar-card fade-in">
                     <div class="pillar-icon">📚</div>
                     <h3 class="pillar-title">References</h3>
-                    <p class="pillar-desc">60+ seminal papers in APA format, a comprehensive FAQ covering every key term, and expert resources from the LLM evaluation literature.</p>
-                    <p class="pillar-topics">APA references, FAQ, foundational work</p>
-                    <a href="#resources" class="pillar-link">View References →</a>
+                    <p class="pillar-desc">60+ seminal papers, a comprehensive glossary covering every key term, and expert resources from the LLM evaluation literature.</p>
+                    <p class="pillar-topics">Paper reading list, glossary, changelog, foundational work</p>
+                    <a href="references.html" class="pillar-link">View References →</a>
                 </div>
             </div>
         </section>
@@ -1868,7 +1992,7 @@ Model Selection → Benchmarking → Continuous Eval → Production Monitoring
         <section id="resources">
             <div class="section-header">
                 <h2 class="section-title">References</h2>
-                <p class="section-subtitle">Seminal papers in LLM evaluation (APA format, 15 of 60+)</p>
+                <p class="section-subtitle">Seminal papers in LLM evaluation</p>
             </div>
 
             <ol class="references-list">
@@ -1997,16 +2121,6 @@ Model Selection → Benchmarking → Continuous Eval → Production Monitoring
                     <p><strong>Our mission:</strong> Make LLM evaluation rigorous, reproducible, and accessible to all practitioners. Evaluation is not a commodity—it's the foundation of trustworthy AI.</p>
                 </div>
 
-                <div style="margin-top: 40px; padding: 20px; background: var(--color-bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
-                    <h4 style="color: var(--color-accent); margin-bottom: 15px;">Credibility & Contributions</h4>
-                    <ul style="list-style: none; color: var(--color-text-secondary); font-size: 14px; line-height: 1.8;">
-                        <li>✓ Benchmarked 100+ models across all major providers (OpenAI, Anthropic, Meta, Google, xAI)</li>
-                        <li>✓ Published and cited in top-tier venues (NeurIPS, ICML, ACL, ICLR)</li>
-                        <li>✓ Active contributors to open-source evaluation tools and benchmark suites</li>
-                        <li>✓ Production deployment experience at scale (billions of evaluations)</li>
-                        <li>✓ Collaborations with leading research labs and AI safety organizations</li>
-                    </ul>
-                </div>
 
                 <div class="social-links">
                     <a href="https://github.com/a217-anjali/llm-evaluation-framework" class="social-link" title="GitHub">🐙</a>

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Evaluation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: background-color 0.3s ease;
+        }
+
+        nav a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            color: var(--color-accent);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header Section */
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.8rem;
+            background-color: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .metric-card h3 {
+            margin-top: 0;
+            color: var(--color-accent);
+            font-size: 1.2rem;
+        }
+
+        .metric-card .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .metric-card .when-to-use,
+        .metric-card .pitfalls {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-card .when-to-use {
+            color: var(--color-accent-light);
+        }
+
+        .metric-card .pitfalls {
+            color: #ff9999;
+        }
+
+        /* Benchmarks */
+        .benchmarks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .benchmark-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .benchmark-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .benchmark-item strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .benchmark-item p {
+            margin-bottom: 0;
+        }
+
+        /* Tips Section */
+        .tips-list {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tips-list li {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .resource-link {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-link strong {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-link-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.1);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--color-accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.95rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .benchmarks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">← Back to Framework</a>
+        <div class="nav-right">
+            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>Production Evaluation</h1>
+            <p class="subtitle">Continuous evaluation, monitoring, governance, and EvalOps at scale</p>
+        </header>
+
+        <!-- Section 1: From Development to Production -->
+        <section id="development-to-production">
+            <h2>From Development to Production</h2>
+            <p>Pre-deployment evaluations provide confidence that a model meets requirements before launch. However, production behavior diverges from lab testing due to real-world complexity, shifting data distributions, and unexpected edge cases. Why evaluation doesn't stop at deployment:</p>
+            <ul>
+                <li><strong>Distribution Shift:</strong> Real-world data differs from curated test sets. Seasonal patterns, domain shifts, and data quality variations emerge in production that weren't visible during development.</li>
+                <li><strong>Time-Varying Performance:</strong> Model behavior drifts over time as user queries evolve, knowledge becomes outdated, and feedback loops introduce new patterns. Performance that meets requirements today may degrade tomorrow.</li>
+                <li><strong>Latency & Scale Effects:</strong> Lab evaluations often run on small batches with artificial conditions. Production reveals bottlenecks, timeout issues, and performance degradation under real load that offline testing misses.</li>
+                <li><strong>User Satisfaction vs. Metrics:</strong> Automated metrics are proxies for user satisfaction. Production feedback (ratings, complaints, support tickets) reveals gaps between metric scores and actual user experience.</li>
+                <li><strong>Edge Cases & Adversarial Inputs:</strong> Real users find corner cases and adversarial inputs that curated test sets never include. Continuous evaluation catches these failure modes early.</li>
+            </ul>
+        </section>
+
+        <!-- Section 2: Continuous Evaluation -->
+        <section id="continuous-evaluation">
+            <h2>Continuous Evaluation</h2>
+            <p>Production monitoring requires three complementary strategies: drift detection to identify distribution shifts, regression monitoring to catch quality degradation, and scheduled evaluation runs to continuously validate model performance:</p>
+
+            <h3>Drift Detection</h3>
+            <p>Detect when production data distribution diverges from training data. Use statistical tests (Kolmogorov-Smirnov, Jensen-Shannon divergence, or Population Stability Index) to identify feature drift, label shift, and concept drift. Set thresholds that trigger investigation and re-evaluation.</p>
+
+            <h3>Regression Monitoring</h3>
+            <p>Track quality metrics continuously. Define baseline performance and alert when metrics drop below thresholds. Implement confidence intervals around metrics to account for sample size variation. Monitor subgroup performance separately to catch disparate impact.</p>
+
+            <h3>Scheduled Evaluation Runs</h3>
+            <p>Run comprehensive evaluations on a regular schedule (weekly, bi-weekly, monthly). Sample production data to evaluate on realistic inputs. Compare results against baseline to quantify performance changes. Use evaluation results to trigger model retraining, hyperparameter tuning, or rollback decisions.</p>
+        </section>
+
+        <!-- Section 3: EvalOps Architecture -->
+        <section id="evalops-architecture">
+            <h2>EvalOps Architecture</h2>
+            <p>EvalOps is the operational infrastructure for running evaluations at scale. A production-grade evaluation system consists of integrated components handling data collection, evaluation execution, result storage, and decision support:</p>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Data Pipeline</h3>
+                    <p>Samples production requests and ground truth labels. Manages data quality checks, deduplication, and privacy-preserving data collection. Routes clean, labeled data to the evaluation runner.</p>
+                    <div class="label">Key Functions</div>
+                    <div class="value">Sampling, labeling, quality checks, privacy masking</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Eval Runner</h3>
+                    <p>Orchestrates evaluation job execution. Manages parallelization across distributed workers. Handles retries, timeouts, and resource allocation. Produces standardized evaluation result formats.</p>
+                    <div class="label">Key Functions</div>
+                    <div class="value">Job scheduling, orchestration, worker management, result standardization</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Metrics Store</h3>
+                    <p>Centralized database for evaluation results. Stores raw scores, aggregated metrics, and historical trends. Enables time-series analysis and anomaly detection. Supports efficient querying by metric, time range, and model version.</p>
+                    <div class="label">Key Functions</div>
+                    <div class="value">Result storage, versioning, time-series queries, trend analysis</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Alerting</h3>
+                    <p>Detects quality regressions and anomalies. Compares current metrics against baselines and thresholds. Triggers notifications to engineering teams. Provides context (severity, affected subgroups, recommended actions).</p>
+                    <div class="label">Key Functions</div>
+                    <div class="value">Anomaly detection, threshold monitoring, notifications, context provision</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Dashboard</h3>
+                    <p>Real-time visualization of evaluation metrics and trends. Allows stakeholders to explore performance by metric, model version, time period, and subgroup. Supports drill-down into individual evaluation results.</p>
+                    <div class="label">Key Functions</div>
+                    <div class="value">Visualization, trend analysis, drill-down, stakeholder reporting</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Version Control</h3>
+                    <p>Tracks evaluation methodology, test data versions, and metric definitions. Enables reproducibility of results. Documents changes to evaluation criteria over time. Supports rollback to previous configurations.</p>
+                    <div class="label">Key Functions</div>
+                    <div class="value">Methodology versioning, data versioning, reproducibility, audit trails</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Model Selection -->
+        <section id="model-selection">
+            <h2>Model Selection</h2>
+            <p>Production model selection requires balancing multiple dimensions: accuracy, latency, cost, and fairness. Rather than optimizing a single metric, use Pareto-optimal analysis to identify models that maximize value:</p>
+            <ul>
+                <li><strong>Pareto Optimality:</strong> A model is Pareto-optimal if no other model dominates it across all important dimensions. Build the frontier of tradeoff models and let stakeholders choose based on their priorities.</li>
+                <li><strong>Cost-Performance Tradeoffs:</strong> Plot accuracy vs. inference cost to identify efficient models. A smaller model with 91% accuracy at $0.001/request may be preferable to a larger model with 94% accuracy at $0.005/request.</li>
+                <li><strong>Fairness Constraints:</strong> Define minimum fairness thresholds (e.g., performance gap < 5% across demographic groups). Filter to models meeting constraints before evaluating accuracy-cost tradeoffs.</li>
+                <li><strong>Production Constraints:</strong> Account for infrastructure limitations (latency budgets, GPU availability, inference SLA). Models meeting all constraints form the feasible set; optimize within that set.</li>
+                <li><strong>Staged Rollout:</strong> Deploy to a small percentage of traffic first. Monitor real-world performance before full rollout. Use A/B testing to compare models directly on production data.</li>
+            </ul>
+        </section>
+
+        <!-- Section 5: Reporting & Governance -->
+        <section id="reporting-governance">
+            <h2>Reporting & Governance</h2>
+            <p>Evaluation results drive critical business decisions and must be documented, communicated, and governed properly. Different stakeholders need different information from evaluation reports:</p>
+
+            <h3>Stakeholder Reports</h3>
+            <p>Technical teams need deep methodological details (metric formulas, test case distribution, confidence intervals). Product managers need trend analysis and business impact (accuracy improvement -> fewer support tickets). Executives need concise summaries and decision recommendations. Compliance teams need audit trails and governance documentation.</p>
+
+            <h3>Compliance & Audit Trails</h3>
+            <p>Maintain comprehensive evaluation logs documenting who evaluated what model with which test data at what time. Track methodology changes (metric definitions, threshold adjustments). Document approval decisions for production deployments. Support regulatory audits with reproducible evaluation evidence.</p>
+
+            <h3>Version Control for Evaluations</h3>
+            <p>Treat evaluation methodology as code. Version control test datasets, metric definitions, and evaluation scripts. Document changes to evaluation criteria over time. Enable reproduction of historical evaluation results for audits and postmortems.</p>
+        </section>
+
+        <!-- Section 6: Practical Tips -->
+        <section id="practical-tips">
+            <h2>Practical Tips</h2>
+
+            <div class="tips-list">
+                <ul>
+                    <li><strong>Start Simple, Iterate:</strong> Don't build a perfect EvalOps system immediately. Start with basic continuous evaluation (sampled data + weekly re-evaluation), then add drift detection, alerting, and dashboards incrementally.</li>
+
+                    <li><strong>Sample Strategically:</strong> Sample production data proportionally by subgroup to ensure drift detection covers all populations. Use stratified sampling for balanced representation of rare classes or edge cases.</li>
+
+                    <li><strong>Set Actionable Thresholds:</strong> Define alert thresholds that trigger concrete actions. "Accuracy drops 2%" should trigger investigation. "Accuracy drops 0.1%" creates alert fatigue. Calibrate thresholds to business impact.</li>
+
+                    <li><strong>Monitor Latency and Cost:</strong> Evaluation isn't just accuracy. Track inference latency and cost drift over time. A model with constant accuracy but 50% higher latency is a regression for production systems.</li>
+
+                    <li><strong>Automate Labeling Where Possible:</strong> Manual labeling is expensive. Use weak labels (click-through rates, user ratings), LLM-generated labels, or active learning to scale. Combine weak labels with periodic human review.</li>
+
+                    <li><strong>Plan for Distribution Shifts:</strong> Expect data to shift. Design evaluation systems to detect and quantify drift. Build retraining pipelines to handle routine concept drift. Document fallback procedures when drift exceeds acceptable limits.</li>
+
+                    <li><strong>Version Control Everything:</strong> Track model versions, test data versions, and evaluation methodology versions. Reproduce historical results for postmortems. Audit who approved each production deployment and why.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 7: Related Resources -->
+        <section id="resources">
+            <h2>Related Resources</h2>
+
+            <div class="resources-grid">
+                <a href="index.html" class="resource-link">
+                    <strong>← Framework Overview</strong>
+                    <p>Return to the main LLM Evaluation Framework</p>
+                    <span class="resource-link-label">Core</span>
+                </a>
+
+                <a href="tooling.html" class="resource-link">
+                    <strong>Tooling & Infrastructure</strong>
+                    <p>Platforms and tools for implementing production evaluation systems</p>
+                    <span class="resource-link-label">Tools</span>
+                </a>
+
+                <a href="index.html#labs" class="resource-link">
+                    <strong>Labs & Experiments</strong>
+                    <p>Interactive tools and notebooks for production evaluation workflows</p>
+                    <span class="resource-link-label">Hands-On</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Other Pillars</strong>
+                    <p>Explore related evaluation dimensions: Accuracy, Efficiency, Robustness, Fairness</p>
+                    <span class="resource-link-label">Explore</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Framework Fundamentals</strong>
+                    <p>Core concepts and principles underlying production evaluation</p>
+                    <span class="resource-link-label">Foundation</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <p>LLM Evaluation Framework | Production Pillar</p>
+        <p>Part of the comprehensive guide to evaluating large language models in production. <a href="index.html">Learn more</a></p>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark-mode');
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeToggleIcon();
+        });
+
+        function updateThemeToggleIcon() {
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Load theme preference
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            htmlElement.classList.remove('dark-mode');
+        }
+        updateThemeToggleIcon();
+
+        // Back to top button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

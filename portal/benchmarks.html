@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmarks in LLM Evaluation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: background-color 0.3s ease;
+        }
+
+        nav a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            color: var(--color-accent);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header Section */
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.8rem;
+            background-color: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .metric-card h3 {
+            margin-top: 0;
+            color: var(--color-accent);
+            font-size: 1.2rem;
+        }
+
+        .metric-card .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .metric-card .when-to-use,
+        .metric-card .pitfalls {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-card .when-to-use {
+            color: var(--color-accent-light);
+        }
+
+        .metric-card .pitfalls {
+            color: #ff9999;
+        }
+
+        /* Benchmarks */
+        .benchmarks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .benchmark-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .benchmark-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .benchmark-item strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .benchmark-item p {
+            margin-bottom: 0;
+        }
+
+        /* Tips Section */
+        .tips-list {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tips-list li {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .resource-link {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-link strong {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-link-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.1);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--color-accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.95rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .benchmarks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">← Back to Framework</a>
+        <div class="nav-right">
+            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>The Complete Benchmark Landscape</h1>
+            <p class="subtitle">50+ benchmarks across 12 categories — mapped, verified, and ready to use</p>
+        </header>
+
+        <!-- Section 1: Understanding Benchmarks -->
+        <section id="understanding-benchmarks">
+            <h2>Understanding Benchmarks</h2>
+            <p>Benchmarks are standardized evaluation datasets and metrics that measure model capabilities across specific dimensions. They provide the foundation for rigorous, reproducible assessment of LLM performance.</p>
+
+            <h3>What Are Benchmarks?</h3>
+            <p>Benchmarks consist of curated test sets with known answers or evaluation criteria, allowing you to compare model performance on identical tasks. A benchmark might include thousands of questions spanning multiple domains, each with a precise evaluation metric (exact match, F1 score, semantic similarity, etc.).</p>
+
+            <h3>Why Benchmarks Matter</h3>
+            <p>Without benchmarks, evaluating LLM improvements is guesswork. Benchmarks enable data-driven decisions: you can measure whether model A truly outperforms model B, identify capability gaps, track progress over time, and justify resource allocation. They're essential for comparing models, validating improvements, and meeting regulatory requirements.</p>
+
+            <h3>How to Interpret Benchmark Results</h3>
+            <p>Benchmark scores must be interpreted carefully. A model scoring 85% on MMLU-Pro might still hallucinate facts, fail on edge cases, or perform poorly on tasks outside the benchmark distribution. Always use multiple benchmarks, examine error patterns, and supplement with human evaluation. Also consider: publication date (benchmarks become saturated), contamination (whether training data leaked into the test set), and domain relevance (does this benchmark measure what matters for your use case?).</p>
+        </section>
+
+        <!-- Section 2: Benchmark Categories -->
+        <section id="categories">
+            <h2>Benchmark Categories</h2>
+            <p>The LLM evaluation landscape spans 12 major capability dimensions. Here are the most critical categories with representative benchmarks:</p>
+
+            <h3>Reasoning & Knowledge</h3>
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>MMLU-Pro</strong>
+                    <p>12,000 multiple-choice questions across 57 domains (STEM, law, medicine, philosophy). Tests broad world knowledge and reasoning. Current frontier score: 89.8%</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>GPQA Diamond</strong>
+                    <p>1,531 expert-authored science questions vetted by domain specialists. Extremely challenging. Current leader: 94.1% (Gemini 3.1 Pro)</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>ARC-AGI-3</strong>
+                    <p>Visual reasoning and pattern recognition tasks designed to expose format optimization over genuine reasoning. Reveals benchmark contamination issues.</p>
+                </div>
+            </div>
+
+            <h3>Coding & Software Engineering</h3>
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>HumanEval</strong>
+                    <p>164 Python function generation tasks. Tests basic programming capability. Frontier models: 90%+. Note: becoming saturated.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>SWE-bench Verified</strong>
+                    <p>Real GitHub issues converted to code-fix tasks. 500+ challenging problems. Frontier score: 80.9% (Claude Opus 4.5). Tests realistic engineering.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>LiveCodeBench</strong>
+                    <p>Monthly programming contest problems. Constantly updated to prevent contamination. Tests sustained coding ability on fresh challenges.</p>
+                </div>
+            </div>
+
+            <h3>Knowledge & Retrieval</h3>
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>TriviaQA</strong>
+                    <p>Fact-based question answering with context. Tests factual knowledge retrieval and reading comprehension. Large-scale evaluation.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>NaturalQuestions</strong>
+                    <p>Real user queries with long-form answers. Tests natural information retrieval and comprehension. Google's benchmark.</p>
+                </div>
+            </div>
+
+            <h3>Multimodal (Vision-Language)</h3>
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>MMBench</strong>
+                    <p>1,168 vision-language QA items testing image understanding and reasoning. Current leader: 88.9% (Gemini 3.1 Pro)</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>MMMU</strong>
+                    <p>11,500 multimodal items across diverse academic domains. More challenging than MMBench. Tests expert-level understanding.</p>
+                </div>
+            </div>
+
+            <h3>Long-Context</h3>
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>RULER</strong>
+                    <p>Synthetic needle-in-haystack tasks across 32K-256K token contexts. Tests information retrieval in extreme context lengths.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>LongBench</strong>
+                    <p>Real long-document QA, summarization, and analysis across 8K-2M word lengths. Tests practical long-context performance.</p>
+                </div>
+            </div>
+
+            <h3>Safety & Alignment</h3>
+            <div class="benchmarks-list">
+                <div class="benchmark-item">
+                    <strong>ToxiGen</strong>
+                    <p>Toxic language and harmful content detection. Tests model resistance to generating harmful outputs.</p>
+                </div>
+                <div class="benchmark-item">
+                    <strong>BBQ</strong>
+                    <p>Bias detection benchmark across demographic dimensions. Tests fairness and stereotype avoidance in QA contexts.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Current Landscape -->
+        <section id="current-landscape">
+            <h2>Current Leaderboard Snapshot (March 2026)</h2>
+            <p>As of March 2026, frontier models dominate most benchmarks, but important patterns emerge:</p>
+
+            <h3>Frontier Leaders</h3>
+            <ul>
+                <li><strong>Gemini 3.1 Pro:</strong> Leads knowledge benchmarks (MMLU: 95.3%, GPQA: 94.1%), multimodal (MMBench: 88.9%), and long-context tasks</li>
+                <li><strong>GPT-5:</strong> Leads mathematical reasoning (AIME 2025: 100% verified, MATH: 90%+), competitive coding, and agentic benchmarks</li>
+                <li><strong>Claude Opus 4.5:</strong> Leads real-world engineering (SWE-bench: 80.9%), safety benchmarks, and multimodal tasks. Strong all-rounder.</li>
+            </ul>
+
+            <h3>Saturation Patterns</h3>
+            <p>Several classic benchmarks have reached saturation (90%+ performance across frontier models): GSM8K (grade school math), HumanEval (basic coding), MMLU (broad knowledge). These no longer discriminate between advanced models. Research has shifted toward harder benchmarks: GPQA, SWE-bench, MATH, LongBench.</p>
+
+            <h3>Capability Gaps</h3>
+            <p>Despite high scores on single-task benchmarks, frontier models struggle with: extended reasoning chains (drop from 95% to 60%+ on multi-step tasks), rare-case handling (performance collapses on out-of-distribution inputs), and domain expertise (specialized benchmarks like medical QA show 70-80% accuracy despite MMLU scores of 90%+).</p>
+        </section>
+
+        <!-- Section 4: Contamination & Integrity -->
+        <section id="contamination">
+            <h2>Contamination & Benchmark Integrity</h2>
+            <p>A critical challenge in LLM evaluation: training data leakage. When benchmark test sets appear in model training data, reported scores become meaningless.</p>
+
+            <h3>The Contamination Problem</h3>
+            <p>Most LLMs train on vast internet-sourced datasets. Benchmarks published years ago likely appear in training data, inflating scores. A model reporting 95% on MMLU might achieve only 75% on truly held-out data. This is not academic—it directly impacts production reliability.</p>
+
+            <h3>ARC-AGI-3 & Format Optimization</h3>
+            <p>ARC-AGI-3 revealed how models optimize for benchmark format rather than genuine reasoning. When the task format was slightly modified, model performance plummeted, proving the learned solution was brittle. This taught the field an important lesson: benchmark design matters deeply. Simple format changes expose shallow generalization.</p>
+
+            <h3>Detection Strategies</h3>
+            <ul>
+                <li><strong>Entropy analysis:</strong> Models trained on benchmark data produce suspiciously low-entropy (repetitive) responses compared to held-out data</li>
+                <li><strong>Temporal validation:</strong> Compare performance on benchmarks published before vs. after model training cutoff</li>
+                <li><strong>Variation testing:</strong> Reformulate questions semantically—if performance drops sharply, it signals format memorization</li>
+                <li><strong>Expert audit:</strong> Have domain specialists review failure cases for memorization patterns</li>
+            </ul>
+
+            <h3>How to Mitigate</h3>
+            <p>Use recently published benchmarks (updated monthly, like LiveCodeBench). Run evaluation on test sets explicitly marked as held-out from training. Prefer dynamic benchmarks over static ones. Always supplement benchmarks with private evaluation data relevant to your specific use case.</p>
+        </section>
+
+        <!-- Section 5: Practical Tips -->
+        <section id="practical-tips">
+            <h2>Practical Tips</h2>
+
+            <div class="tips-list">
+                <ul>
+                    <li><strong>Stack Benchmarks by Difficulty:</strong> Start with saturated benchmarks (HumanEval, GSM8K) as sanity checks, then layer on harder benchmarks (SWE-bench, GPQA, MATH) for real discrimination. This creates a defense-in-depth evaluation.</li>
+
+                    <li><strong>Prioritize Domain Relevance:</strong> A benchmark's quality matters less than its relevance to your use case. MMLU is excellent for general knowledge but useless for evaluating specialized medical models. Always include domain-specific benchmarks alongside general ones.</li>
+
+                    <li><strong>Watch for Contamination Red Flags:</strong> Suspiciously high scores on older benchmarks, especially combined with much lower scores on newer variants, suggest data leakage. Verify benchmark publication dates against model training dates.</li>
+
+                    <li><strong>Use Leaderboards Wisely:</strong> Public leaderboards (HELM, OpenCompass, Hugging Face) provide useful context but should never be your only evaluation source. Gaming is rampant—models tune specifically for published benchmarks. Combine leaderboards with private evaluation.</li>
+
+                    <li><strong>Break Down by Error Type:</strong> Report not just overall scores but error distributions. "92% accuracy" hides whether failures cluster in adversarial inputs, rare cases, or specific domains. Pattern analysis is essential for identifying where to improve.</li>
+
+                    <li><strong>Evaluate Benchmark Compositionality:</strong> Tests that combine multiple sub-tasks often reveal failures that single-task benchmarks miss. A model might score 95% on reading comprehension and 95% on arithmetic, but only 70% when both are required together.</li>
+
+                    <li><strong>Establish Evaluation Baselines Early:</strong> Set minimum acceptable scores on critical benchmarks before model development, not after. This prevents post-hoc rationalization of mediocre results and forces early detection of capability gaps.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 6: Related Resources -->
+        <section id="resources">
+            <h2>Related Resources</h2>
+
+            <div class="resources-grid">
+                <a href="index.html" class="resource-link">
+                    <strong>← Framework Overview</strong>
+                    <p>Return to the main LLM Evaluation Framework</p>
+                    <span class="resource-link-label">Core</span>
+                </a>
+
+                <a href="foundations.html" class="resource-link">
+                    <strong>Foundations Pillar</strong>
+                    <p>Understand core evaluation concepts and principles before diving into benchmarks</p>
+                    <span class="resource-link-label">Foundations</span>
+                </a>
+
+                <a href="methods.html" class="resource-link">
+                    <strong>Methods Pillar</strong>
+                    <p>Detailed technical guidance on evaluation methodologies and best practices</p>
+                    <span class="resource-link-label">Methods</span>
+                </a>
+
+                <a href="accuracy.html" class="resource-link">
+                    <strong>Accuracy Pillar</strong>
+                    <p>Dive deep into accuracy metrics and how to measure output correctness</p>
+                    <span class="resource-link-label">Related Pillar</span>
+                </a>
+
+                <a href="index.html" class="resource-link">
+                    <strong>Other Evaluation Pillars</strong>
+                    <p>Explore efficiency, robustness, fairness, and interpretability evaluations</p>
+                    <span class="resource-link-label">Explore</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <p>LLM Evaluation Framework | Benchmarks Pillar</p>
+        <p>Part of the comprehensive guide to evaluating large language models. <a href="index.html">Learn more</a></p>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark-mode');
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeToggleIcon();
+        });
+
+        function updateThemeToggleIcon() {
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Load theme preference
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            htmlElement.classList.remove('dark-mode');
+        }
+        updateThemeToggleIcon();
+
+        // Back to top button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

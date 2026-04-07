@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluation Tooling</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: background-color 0.3s ease;
+        }
+
+        nav a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            color: var(--color-accent);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header Section */
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.8rem;
+            background-color: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .metric-card h3 {
+            margin-top: 0;
+            color: var(--color-accent);
+            font-size: 1.2rem;
+        }
+
+        .metric-card .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .metric-card .when-to-use,
+        .metric-card .pitfalls {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-card .when-to-use {
+            color: var(--color-accent-light);
+        }
+
+        .metric-card .pitfalls {
+            color: #ff9999;
+        }
+
+        /* Benchmarks */
+        .benchmarks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .benchmark-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .benchmark-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .benchmark-item strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .benchmark-item p {
+            margin-bottom: 0;
+        }
+
+        /* Tips Section */
+        .tips-list {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tips-list li {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .resource-link {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-link strong {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-link-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.1);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--color-accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.95rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .benchmarks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">← Back to Framework</a>
+        <div class="nav-right">
+            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>Evaluation Tooling</h1>
+            <p class="subtitle">25+ tools compared — from open-source harnesses to enterprise platforms</p>
+        </header>
+
+        <!-- Section 1: The Tool Landscape -->
+        <section id="tool-landscape">
+            <h2>The Tool Landscape</h2>
+            <p>The LLM evaluation tool ecosystem has matured dramatically. You now have choices spanning open-source research harnesses, commercial SaaS platforms, and self-hosted infrastructure. The right tool depends on your use case, budget, and integration needs.</p>
+            <p>Tools fall into several categories:</p>
+            <ul>
+                <li><strong>General-Purpose Frameworks:</strong> DeepEval, lm-evaluation-harness, Inspect AI — versatile, broad metric support, research-focused</li>
+                <li><strong>RAG-Specific:</strong> Ragas — designed for retrieval-augmented generation evaluation</li>
+                <li><strong>Prompt Optimization:</strong> Promptfoo — A/B testing, red teaming, CI/CD integration</li>
+                <li><strong>Production Monitoring:</strong> LangSmith, Braintrust, Langfuse — agent tracing, human-in-the-loop, continuous monitoring</li>
+                <li><strong>Enterprise Platforms:</strong> Braintrust, LangSmith — comprehensive scoring, human annotation, compliance features</li>
+                <li><strong>Safety-First:</strong> Inspect AI, Garak — adversarial testing, red teaming, safety evaluation</li>
+            </ul>
+        </section>
+
+        <!-- Section 2: Tool Comparison -->
+        <section id="tool-comparison">
+            <h2>Tool Comparison</h2>
+            <p>Each tool excels in specific scenarios. Here's a practical breakdown of the major players:</p>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>DeepEval</h3>
+                    <p>Most popular open-source framework with 50+ metrics, pytest integration, and agentic evaluation. Zero to evaluation in minutes.</p>
+                    <div class="label">Best For</div>
+                    <div class="when-to-use">Rapid prototyping, CI/CD pipelines, multi-metric evaluation, quick iteration</div>
+                    <div class="label">Strengths</div>
+                    <div class="value">50+ pre-built metrics • Pytest integration • 3M monthly downloads • Free and easy setup</div>
+                    <div class="label">Limitations</div>
+                    <div class="pitfalls">Limited production monitoring • Cloud infrastructure not included • Requires external LLM for judging</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>lm-evaluation-harness</h3>
+                    <p>Industry-standard benchmark framework maintained by EleutherAI. Access to 1000+ standardized benchmarks and HuggingFace Leaderboard integration.</p>
+                    <div class="label">Best For</div>
+                    <div class="when-to-use">Benchmark alignment, research reproduction, model comparison, leaderboard submission</div>
+                    <div class="label">Strengths</div>
+                    <div class="value">1000+ benchmarks • HF Leaderboard integration • VLM support • No vendor lock-in</div>
+                    <div class="label">Limitations</div>
+                    <div class="pitfalls">Steep learning curve • Benchmark-centric only • Limited for custom metrics • Slow for large-scale eval</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Inspect AI</h3>
+                    <p>Government-backed safety evaluation framework from UK AISI. 100+ evaluators, MCP tool support, sandboxed execution for safety testing.</p>
+                    <div class="label">Best For</div>
+                    <div class="when-to-use">Safety-critical evaluation, adversarial testing, jailbreak detection, regulatory compliance</div>
+                    <div class="label">Strengths</div>
+                    <div class="value">100+ specialized evaluators • Agentic safety focus • MCP tool support • Sandbox execution</div>
+                    <div class="label">Limitations</div>
+                    <div class="pitfalls">Steeper learning curve • Safety-focused (not general metrics) • Smaller community than DeepEval</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Ragas</h3>
+                    <p>Purpose-built for RAG pipeline evaluation. Context relevance, faithfulness, answer relevance metrics without reference answers.</p>
+                    <div class="label">Best For</div>
+                    <div class="when-to-use">RAG systems, retrieval evaluation, LangChain integration, reference-free evaluation</div>
+                    <div class="label">Strengths</div>
+                    <div class="value">5 core RAG metrics • Reference-free • LangChain native • Low cost (~$0-25)</div>
+                    <div class="label">Limitations</div>
+                    <div class="pitfalls">RAG-specific only • Limited to reference-free metrics • Not for traditional NLP tasks</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Promptfoo</h3>
+                    <p>Prompt variant testing and red teaming. GOAT attacks, Crescendo adversarial tests, cost tracking. Recently acquired by OpenAI.</p>
+                    <div class="label">Best For</div>
+                    <div class="when-to-use">Prompt optimization, A/B testing, red teaming, cost analysis, CI/CD integration</div>
+                    <div class="label">Strengths</div>
+                    <div class="value">Red teaming attacks • Cost tracking • A/B testing • CLI-first design • OpenAI backed</div>
+                    <div class="label">Limitations</div>
+                    <div class="pitfalls">Prompt-centric • Limited metrics library • Acquisition creates roadmap uncertainty</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>LangSmith</h3>
+                    <p>LangChain's official production platform. Agent trajectory analysis, human-in-the-loop feedback, continuous monitoring at scale.</p>
+                    <div class="label">Best For</div>
+                    <div class="when-to-use">Production agents, enterprise deployments, LangChain integration, human annotation, long-term monitoring</div>
+                    <div class="label">Strengths</div>
+                    <div class="value">Agent tracing • Human feedback loops • Production ready • LangChain native • Cost insights</div>
+                    <div class="label">Limitations</div>
+                    <div class="pitfalls">Expensive ($500-5000/month) • LangChain lock-in • Limited for non-LangChain workflows</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Braintrust</h3>
+                    <p>Enterprise evaluation with 25+ built-in scorers. Used by Notion, Stripe, Vercel. Online evaluation, human annotation, Loop AI assistant.</p>
+                    <div class="label">Best For</div>
+                    <div class="when-to-use">Enterprise deployments, compliance-heavy projects, human annotation at scale, proprietary metrics</div>
+                    <div class="label">Strengths</div>
+                    <div class="value">25+ scorers • Human annotation • Online eval • Enterprise features • Compliance ready</div>
+                    <div class="label">Limitations</div>
+                    <div class="pitfalls">Very expensive ($1000+/month) • Requires enterprise contract • Complex onboarding</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Langfuse</h3>
+                    <p>Cost-conscious alternative to LangSmith. Open-source, self-hostable, or cloud. Tracing + evaluation, human annotation, MIT license.</p>
+                    <div class="label">Best For</div>
+                    <div class="when-to-use">Budget-conscious teams, privacy-critical deployments, self-hosted evaluation, long-term monitoring</div>
+                    <div class="label">Strengths</div>
+                    <div class="value">Self-hostable • MIT open source • Cloud option (~$100/month) • Full control • Human annotation</div>
+                    <div class="label">Limitations</div>
+                    <div class="pitfalls">Smaller community • Self-hosting requires DevOps • Fewer built-in scorers than Braintrust</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Custom Harness</h3>
+                    <p>Build your own evaluation framework for domain-specific needs. Requires 1-2 weeks but gives complete control and lowest cost at scale.</p>
+                    <div class="label">Best For</div>
+                    <div class="when-to-use">Domain-specific metrics, tight integration needs, high-volume evaluation, proprietary methods</div>
+                    <div class="label">Strengths</div>
+                    <div class="value">Complete control • Lowest long-term cost • No vendor lock-in • Custom metrics • Flexible</div>
+                    <div class="label">Limitations</div>
+                    <div class="pitfalls">High upfront effort • Maintenance burden • Missing built-in features • Smaller ecosystem</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Selection Criteria -->
+        <section id="selection-criteria">
+            <h2>Selection Criteria</h2>
+            <p>Choose your tool based on these dimensions:</p>
+
+            <h3>Open-Source vs. Commercial</h3>
+            <ul>
+                <li><strong>Open-Source:</strong> DeepEval, lm-evaluation-harness, Inspect AI, Ragas, Langfuse, Promptfoo. Best for research, avoiding lock-in, privacy-critical work.</li>
+                <li><strong>Commercial SaaS:</strong> LangSmith, Braintrust. Best for hands-off operations, compliance auditing, enterprise support.</li>
+                <li><strong>Hybrid:</strong> Langfuse (cloud or self-hosted), Braintrust (cloud with self-hosting option).</li>
+            </ul>
+
+            <h3>Feature Requirements</h3>
+            <ul>
+                <li><strong>Number of Metrics:</strong> DeepEval (50+), lm-evaluation-harness (1000+), Braintrust (25+). Ragas if RAG-specific.</li>
+                <li><strong>Production Monitoring:</strong> LangSmith, Braintrust, Langfuse all excel. DeepEval lacks native monitoring.</li>
+                <li><strong>Human-in-the-Loop:</strong> LangSmith, Braintrust, Langfuse. None available in pure research tools.</li>
+                <li><strong>Safety Evaluation:</strong> Inspect AI, Garak. Not a focus of other frameworks.</li>
+                <li><strong>Prompt Optimization:</strong> Promptfoo specifically designed for this. Others are metric-centric.</li>
+            </ul>
+
+            <h3>Integration Ecosystem</h3>
+            <ul>
+                <li><strong>LangChain Users:</strong> LangSmith, Ragas, Langfuse, Braintrust all integrate natively.</li>
+                <li><strong>Generic Python:</strong> DeepEval, lm-evaluation-harness, Inspect AI, custom harness.</li>
+                <li><strong>CI/CD First:</strong> Promptfoo, DeepEval both provide CLI and pipeline-friendly APIs.</li>
+                <li><strong>Isolated Evaluation:</strong> Any framework works; choose by other criteria.</li>
+            </ul>
+
+            <h3>Budget Considerations</h3>
+            <ul>
+                <li><strong>Free/Open-Source:</strong> DeepEval, lm-evaluation-harness, Inspect AI, Ragas (+ LLM judge costs)</li>
+                <li><strong>Low-Cost:</strong> Langfuse cloud (~$100/month) or self-hosted ($0 + infrastructure)</li>
+                <li><strong>Mid-Tier:</strong> LangSmith ($500-5000/month depending on scale)</li>
+                <li><strong>Enterprise:</strong> Braintrust ($1000+/month with contract negotiation)</li>
+            </ul>
+        </section>
+
+        <!-- Section 4: Integration Patterns -->
+        <section id="integration-patterns">
+            <h2>Integration Patterns</h2>
+
+            <h3>CI/CD Integration</h3>
+            <p>Run evaluations on every commit. DeepEval and Promptfoo excel here with pytest integration and CLI tools. Typical setup:</p>
+            <ul>
+                <li>Add evaluation step to GitHub Actions / GitLab CI / Jenkins</li>
+                <li>Define pass/fail thresholds (e.g., accuracy > 85%)</li>
+                <li>Block merge if evaluation fails</li>
+                <li>Track metric trends over commits</li>
+            </ul>
+
+            <h3>API-Based Evaluation</h3>
+            <p>For production systems, evaluate outputs as they're generated. LangSmith and Braintrust are built for this with scalable APIs:</p>
+            <ul>
+                <li>Stream outputs to evaluation service</li>
+                <li>Real-time scoring and quality metrics</li>
+                <li>Flag problematic outputs for human review</li>
+                <li>Continuous monitoring of drift</li>
+            </ul>
+
+            <h3>Notebook Workflows</h3>
+            <p>For exploratory analysis and one-off evaluation. All frameworks support notebooks:</p>
+            <ul>
+                <li>Load dataset in Jupyter</li>
+                <li>Define custom evaluation metrics</li>
+                <li>Visualize results and error patterns</li>
+                <li>Iterate on prompts/models in real-time</li>
+            </ul>
+
+            <h3>Batch Offline Evaluation</h3>
+            <p>Large-scale one-time evaluations. lm-evaluation-harness and custom harnesses shine here:</p>
+            <ul>
+                <li>Evaluate entire benchmarks or datasets</li>
+                <li>Distribute across multiple machines for speed</li>
+                <li>Generate comprehensive reports</li>
+                <li>Archive results for reproducibility</li>
+            </ul>
+        </section>
+
+        <!-- Section 5: Practical Tips -->
+        <section id="practical-tips">
+            <h2>Practical Tips</h2>
+
+            <div class="tips-list">
+                <ul>
+                    <li><strong>Start with DeepEval:</strong> If you're new to LLM evaluation, DeepEval is the best entry point. Easy setup, 50+ metrics, active community, zero platform lock-in.</li>
+
+                    <li><strong>Use Multiple Tools Strategically:</strong> Don't commit to one. Use DeepEval for rapid iteration, lm-evaluation-harness for benchmark validation, Inspect AI for safety checks. Mix and match.</li>
+
+                    <li><strong>Benchmark First:</strong> Before building custom evaluations, validate against standard benchmarks (MMLU, HaluEval, TruthfulQA). This ensures your metrics aren't miscalibrated.</li>
+
+                    <li><strong>Budget for LLM Judge Costs:</strong> DeepEval, Ragas, and custom harnesses all use LLM judges (GPT-4, Claude) for semantic evaluation. Budget $0.01-0.10 per evaluation at scale. This dominates compute costs.</li>
+
+                    <li><strong>Automate as Early as Possible:</strong> Set up CI/CD evaluation pipelines before production. Early automation catches quality regressions weeks before users notice.</li>
+
+                    <li><strong>Human Evaluation Calibration:</strong> Have humans evaluate 5-10% of samples. Use results to calibrate automated metrics. Never trust metrics without human validation on your domain.</li>
+
+                    <li><strong>Track Metric Trends, Not Snapshots:</strong> A single evaluation run means little. Track metrics week-over-week to spot drift, seasonal patterns, and degradation. Use evaluation history to drive prioritization.</li>
+
+                    <li><strong>Monitor for Tool Changes:</strong> Promptfoo (OpenAI acquisition) and LangSmith (enterprise focus shift) are evolving. Stay aware of pricing, feature, and roadmap changes to avoid surprises.</li>
+
+                    <li><strong>Consider Self-Hosting for Privacy:</strong> If you have sensitive data (healthcare, finance), use Langfuse self-hosted or build a custom harness. Avoid cloud SaaS for regulated domains unless you need compliance certifications.</li>
+
+                    <li><strong>Red Team Early, Red Team Often:</strong> Use Inspect AI or Garak for adversarial testing before deployment. Jailbreaks, prompt injections, and hallucinations compound in production. Catch them in evaluation, not in production.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 6: Related Resources -->
+        <section id="resources">
+            <h2>Related Resources</h2>
+
+            <div class="resources-grid">
+                <a href="index.html" class="resource-link">
+                    <strong>← Framework Overview</strong>
+                    <p>Return to the main LLM Evaluation Framework</p>
+                    <span class="resource-link-label">Core</span>
+                </a>
+
+                <a href="methods.html" class="resource-link">
+                    <strong>Evaluation Methods</strong>
+                    <p>Deep dive into evaluation methodologies and best practices</p>
+                    <span class="resource-link-label">Concepts</span>
+                </a>
+
+                <a href="accuracy.html" class="resource-link">
+                    <strong>Accuracy Pillar</strong>
+                    <p>Metrics and benchmarks for measuring output correctness</p>
+                    <span class="resource-link-label">Metrics</span>
+                </a>
+
+                <a href="labs.html" class="resource-link">
+                    <strong>Labs & Benchmarks</strong>
+                    <p>Interactive notebooks and standardized evaluation benchmarks</p>
+                    <span class="resource-link-label">Tools</span>
+                </a>
+
+                <a href="production.html" class="resource-link">
+                    <strong>Production Deployment</strong>
+                    <p>Continuous evaluation and monitoring in live systems</p>
+                    <span class="resource-link-label">Operations</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <p>LLM Evaluation Framework | Tooling Pillar</p>
+        <p>Part of the comprehensive guide to evaluating large language models. <a href="index.html">Learn more</a></p>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark-mode');
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeToggleIcon();
+        });
+
+        function updateThemeToggleIcon() {
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Load theme preference
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            htmlElement.classList.remove('dark-mode');
+        }
+        updateThemeToggleIcon();
+
+        // Back to top button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foundations of LLM Evaluation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-text: #1e293b;
+            --color-text-secondary: #334155;
+            --color-accent: #56b4d9;
+            --color-accent-dark: #3a9ec5;
+            --color-accent-light: #87ceeb;
+            --color-border: #cbd5e1;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-bg-secondary: #1a2844;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #cbd5e1;
+            --color-accent: #87ceeb;
+            --color-accent-dark: #56b4d9;
+            --color-accent-light: #a8ddf0;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: background-color 0.3s ease;
+        }
+
+        nav a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            color: var(--color-accent);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Header Section */
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.8rem;
+            background-color: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .metric-card h3 {
+            margin-top: 0;
+            color: var(--color-accent);
+            font-size: 1.2rem;
+        }
+
+        .metric-card .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .metric-card .when-to-use,
+        .metric-card .pitfalls {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-card .when-to-use {
+            color: var(--color-accent-light);
+        }
+
+        .metric-card .pitfalls {
+            color: #ff9999;
+        }
+
+        /* Benchmarks */
+        .benchmarks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .benchmark-item {
+            background-color: var(--color-bg-secondary);
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .benchmark-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .benchmark-item strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .benchmark-item p {
+            margin-bottom: 0;
+        }
+
+        /* Tips Section */
+        .tips-list {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tips-list li {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .resource-link {
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .resource-link:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-link strong {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-link-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--color-accent);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.1);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--color-accent-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.95rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .benchmarks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-to-top {
+                bottom: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">← Back to Framework</a>
+        <div class="nav-right">
+            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>Foundations of LLM Evaluation</h1>
+            <p class="subtitle">Core evaluation theory, metrics design, statistical rigor, and first principles</p>
+        </header>
+
+        <!-- Section 1: Why Evaluation Matters -->
+        <section id="why-evaluation-matters">
+            <h2>Why Evaluation Matters</h2>
+            <p>Evaluation is not optional—it is the foundational practice that separates rigorous AI deployment from wishful thinking. Without systematic evaluation, organizations face compounded risks across business, technical, and safety dimensions.</p>
+
+            <h3>Business Impact</h3>
+            <p>Model selection decisions carry significant economic implications. A difference of 16% in model capability can reduce operational costs per resolved task by 40% when accounting for escalations and failures. Beyond cost, inadequate evaluation creates substantial risk: a single production failure due to insufficient evaluation testing can cost upwards of $500K in direct costs plus millions in reputational damage and remediation.</p>
+
+            <h3>Technical Correctness</h3>
+            <p>Benchmark performance and real-world performance diverge significantly. Frontier models score 85-95% on standard benchmarks, making differentiation difficult. Distribution mismatch, benchmark saturation, and the contamination problem (where benchmarks appear in training data) all mean that evaluation must extend beyond published benchmarks to task-specific, real-world data to inform deployment decisions.</p>
+
+            <h3>Safety and Compliance</h3>
+            <p>Without explicit safety evaluation, harmful capabilities can remain undetected in production systems. The EU AI Act, US Executive Order on AI, and sector-specific regulations now mandate rigorous evaluation documentation and performance guarantees. Evaluation is essential for demonstrating reasonable care, due diligence, and compliance with emerging regulatory frameworks.</p>
+        </section>
+
+        <!-- Section 2: Taxonomy of Evaluations -->
+        <section id="taxonomy">
+            <h2>Taxonomy of Evaluations</h2>
+            <p>Evaluation varies along multiple critical dimensions. Understanding these dimensions is essential for designing evaluations that match your specific needs and inform the right decisions.</p>
+
+            <h3>Intrinsic vs. Extrinsic</h3>
+            <p><strong>Intrinsic evaluation</strong> measures model capabilities in isolation using benchmarks and standardized tests. It's fast, reproducible, and excellent for early-stage capability assessment and model screening. <strong>Extrinsic evaluation</strong> measures performance in real-world applications, capturing task-specific success and business outcomes. It's slower and more expensive but provides the strongest signal for deployment decisions. Best practice: combine both—use intrinsic for rapid iteration, extrinsic for final validation.</p>
+
+            <h3>Automated vs. Human Evaluation</h3>
+            <p><strong>Automated metrics</strong> like BLEU, ROUGE, and BERTScore are fast and scalable but often misaligned with human judgment. <strong>Human evaluation</strong> has the best correlation with user experience but is expensive and slow. <strong>Hybrid approaches</strong> combine both: use automated metrics for screening, then human annotators for high-uncertainty or high-stakes cases.</p>
+
+            <h3>Static vs. Dynamic vs. Live Benchmarks</h3>
+            <p><strong>Static benchmarks</strong> (MMLU, HumanEval) provide reproducible, comparable results but are vulnerable to contamination and saturation. <strong>Dynamic benchmarks</strong> generate fresh evaluation tasks, reducing contamination risk. <strong>Live benchmarks</strong> (Chatbot Arena) evaluate on real user queries, providing the strongest signal but with annotation quality variation.</p>
+
+            <h3>Pre-Deployment vs. Continuous</h3>
+            <p><strong>Pre-deployment evaluation</strong> is a comprehensive gate for production—it should cover capability, safety, alignment, and task-specific dimensions. <strong>Continuous evaluation</strong> monitors performance in production, detecting degradation and data drift. Both are essential; pre-deployment evaluation without continuous monitoring leaves organizations blind to post-launch failures.</p>
+        </section>
+
+        <!-- Section 3: Core Metrics -->
+        <section id="core-metrics">
+            <h2>Core Metrics</h2>
+            <p>Different metrics capture different dimensions of model quality. None is perfect alone—combine them for comprehensive understanding:</p>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Exact Match (EM)</h3>
+                    <p>Character-level match between model output and reference answer.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Factoid QA, standardized test questions, short unambiguous answers</div>
+                    <div class="label">Formula</div>
+                    <div class="value">EM = (# exact matches) / (# total samples)</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Too strict for open-ended answers; misses semantically correct paraphrases</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>F1 Score</h3>
+                    <p>Token-level overlap balancing precision and recall of matched tokens.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Extractive QA, span-based answers, evaluating partial correctness</div>
+                    <div class="label">Formula</div>
+                    <div class="value">F1 = 2 × (Precision × Recall) / (Precision + Recall)</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Doesn't capture word order or semantic meaning; treats all tokens equally</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>BLEU Score</h3>
+                    <p>N-gram overlap between generated and reference text, widely used for translation.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Machine translation, summarization, text generation tasks</div>
+                    <div class="label">Formula</div>
+                    <div class="value">BLEU = BP × exp(Σ log(pₙ)) where pₙ = matched n-grams / total n-grams</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Poor human correlation; punishes valid paraphrases; tokenization-sensitive</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>ROUGE Score</h3>
+                    <p>Recall-focused n-gram overlap, standard for summarization evaluation.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Abstractive summarization, document generation evaluation</div>
+                    <div class="label">Formula</div>
+                    <div class="value">ROUGE-N = Σ(matched N-grams) / Σ(total reference N-grams)</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Length-biased; doesn't penalize factual errors if n-grams overlap</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>BERTScore</h3>
+                    <p>Semantic similarity via contextual embeddings, capturing meaning beyond n-grams.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Open-ended generation, paraphrase detection, semantic evaluation</div>
+                    <div class="label">Formula</div>
+                    <div class="value">BERTScore = avg(cosine_similarity(embedding_pred, embedding_ref))</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Doesn't guarantee factual accuracy; sensitive to embedding model quality</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Perplexity</h3>
+                    <p>How surprised the model is by the true sequence; standard for language model evaluation.</p>
+                    <div class="label">When to Use</div>
+                    <div class="when-to-use">Language model pre-training, fine-tuning, next-token prediction quality</div>
+                    <div class="label">Formula</div>
+                    <div class="value">PPL = exp(-1/N Σ log p(wᵢ)) where p(wᵢ) is token probability</div>
+                    <div class="label">Pitfalls</div>
+                    <div class="pitfalls">Logarithmic scale masks probability differences; tokenization-dependent</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Statistical Rigor -->
+        <section id="statistical-rigor">
+            <h2>Statistical Rigor</h2>
+            <p>A metric score alone is meaningless without uncertainty quantification and statistical justification. "Model A achieves 87.3% accuracy" hides critical information about variance, significance, and reliability.</p>
+
+            <h3>Confidence Intervals</h3>
+            <p>Always report confidence intervals, not just point estimates. The bootstrap method is the workhorse: resample your evaluation set with replacement 1,000-10,000 times, compute the metric each time, and use the 2.5% and 97.5% percentiles as your 95% confidence interval. This works for any metric and requires no distributional assumptions.</p>
+
+            <h3>Effect Sizes</h3>
+            <p>When comparing two models, report effect sizes (Cohen's d or Cliff's delta) alongside p-values. An effect size quantifies the magnitude of difference: small effects require many samples to detect, large effects are detectable with few samples. A statistically significant difference is not necessarily practically meaningful.</p>
+
+            <h3>Paired vs. Unpaired Tests</h3>
+            <p>If both models are evaluated on the same samples, use paired tests (paired t-test, Wilcoxon signed-rank). Paired tests eliminate sample-to-sample variance and have more statistical power. If different samples are used, use unpaired tests. This choice fundamentally affects statistical conclusions.</p>
+
+            <h3>Multiple Comparisons Correction</h3>
+            <p>Comparing N models means N(N-1)/2 pairwise tests. Each test has a 5% false positive rate; comparing 10 models gives ~25% chance of at least one false positive by chance. Correct using Bonferroni (conservative, divides α by M), Holm (less conservative), or Benjamini-Hochberg FDR (for many tests).</p>
+
+            <h3>Prompt Sensitivity</h3>
+            <p>Evaluate models across multiple prompt variations. Report mean performance and standard deviation across prompts. A model with 87.3% on one prompt might be 83% or 91% on another. Stable performance across prompts is stronger evidence of genuine capability.</p>
+        </section>
+
+        <!-- Section 5: Evaluation Strategy -->
+        <section id="evaluation-strategy">
+            <h2>Designing Your Evaluation Strategy</h2>
+            <p>No single evaluation approach is best. Your strategy depends on your specific question, constraints, and use case. Consider these dimensions:</p>
+
+            <h3>Capability Assessment</h3>
+            <p>Use intrinsic benchmarks for initial capability screening (fast, standardized), then extrinsic task-specific evaluation on your actual use case data (slower, more informative). Measure accuracy, F1, semantic similarity, and task-specific metrics. Always disaggregate results by subgroup (task type, difficulty level, domain) to identify weaknesses.</p>
+
+            <h3>Safety Evaluation</h3>
+            <p>Pre-deployment: conduct red teaming and adversarial testing. Test hallucination (using tools like SelfCheckGPT), jailbreak attempts, bias and toxicity, and alignment with intended constraints. Continuous: maintain automated safety monitoring (toxicity classifiers, refusal consistency checks, factuality monitoring). Both are mandatory for production systems.</p>
+
+            <h3>Statistical Design</h3>
+            <p>Before evaluating, use power analysis to determine required sample size. Set effect size of interest and desired power (80-90% is standard). For typical evaluations: to detect a medium effect (d=0.5) with 80% power requires ~64 samples per group. Report confidence intervals, effect sizes, and multiple comparison corrections for all results.</p>
+        </section>
+
+        <!-- Section 6: Practical Tips -->
+        <section id="practical-tips">
+            <h2>Practical Tips</h2>
+
+            <div class="tips-list">
+                <ul>
+                    <li><strong>Use Multiple Metrics:</strong> No single metric captures quality fully. For generation tasks, combine n-gram metrics (BLEU/ROUGE) with semantic metrics (BERTScore). For classification, use accuracy, precision, recall, and F1.</li>
+
+                    <li><strong>Always Include Human Evaluation:</strong> Automated metrics are proxies, not ground truth. Human evaluate 5-10% of data in a stratified sample to calibrate automated scores and catch metric blind spots. Report inter-annotator agreement (Cohen's kappa or Krippendorff's alpha).</li>
+
+                    <li><strong>Test Adversarial Inputs:</strong> Evaluate on edge cases, out-of-distribution examples, and adversarial inputs. A model with 95% on clean data might collapse to 60% on adversarial examples.</li>
+
+                    <li><strong>Monitor in Production:</strong> Set up continuous evaluation pipelines. Accuracy degrades over time as user queries shift and knowledge becomes outdated. Monitor weekly or monthly using lightweight automated metrics.</li>
+
+                    <li><strong>Set Minimum Thresholds:</strong> Define what "good enough" looks like before deployment. For healthcare: 98%+. For customer support: 90%+. For creative writing: 70%+. Make requirements explicit.</li>
+
+                    <li><strong>Disaggregate Results:</strong> Report accuracy not overall, but by task type, difficulty level, topic, or demographic group. A model might be 92% accurate overall but only 70% on non-English inputs.</li>
+
+                    <li><strong>Evaluate Early and Often:</strong> Run evaluation during development to identify high-error patterns. Use results to prioritize improvements or data collection. Avoid surprises at deployment time.</li>
+
+                    <li><strong>Report Methodology in Detail:</strong> Document prompt templates, metric computation, answer normalization, sample sizes, confidence intervals, and assumptions. Reproducibility depends on methodological clarity.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 7: Related Resources -->
+        <section id="resources">
+            <h2>Related Resources</h2>
+
+            <div class="resources-grid">
+                <a href="index.html" class="resource-link">
+                    <strong>← Framework Overview</strong>
+                    <p>Return to the main LLM Evaluation Framework</p>
+                    <span class="resource-link-label">Core</span>
+                </a>
+
+                <a href="accuracy.html" class="resource-link">
+                    <strong>Accuracy Pillar</strong>
+                    <p>Deep dive into accuracy metrics and hallucination evaluation</p>
+                    <span class="resource-link-label">Pillar</span>
+                </a>
+
+                <a href="index.html#benchmarks" class="resource-link">
+                    <strong>Benchmarks Section</strong>
+                    <p>Comprehensive list of evaluation benchmarks with leaderboards</p>
+                    <span class="resource-link-label">Reference</span>
+                </a>
+
+                <a href="index.html#metrics-deep-dive" class="resource-link">
+                    <strong>Metrics Deep Dive</strong>
+                    <p>Technical guide to evaluation metrics with formulas and implementations</p>
+                    <span class="resource-link-label">Technical</span>
+                </a>
+
+                <a href="index.html#labs" class="resource-link">
+                    <strong>Labs & Tools</strong>
+                    <p>Interactive tools and notebooks for evaluating your own models</p>
+                    <span class="resource-link-label">Tools</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <p>LLM Evaluation Framework | Foundations Pillar</p>
+        <p>Part of the comprehensive guide to evaluating large language models. <a href="index.html">Learn more</a></p>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark-mode');
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeToggleIcon();
+        });
+
+        function updateThemeToggleIcon() {
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        // Load theme preference
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            htmlElement.classList.remove('dark-mode');
+        }
+        updateThemeToggleIcon();
+
+        // Back to top button
+        const backToTopButton = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>
